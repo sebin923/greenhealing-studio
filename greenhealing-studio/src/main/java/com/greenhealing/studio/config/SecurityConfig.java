@@ -20,20 +20,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products", "/products/**",
-                        "/signup", "/login", "/classes", "/classes/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true)
-                .permitAll()
-            )
-            .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
-            // 개발 초기 단계 임시 설정. 실제 폼 제출(POST) 붙이면 CSRF 토큰을 폼에 반드시 포함시키세요.
-            .csrf(AbstractHttpConfigurer::disable);
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products", "/products/**",
+                                "/signup", "/login", "/classes", "/classes/**",
+                                "/password-reset", "/password-reset/**", "/api/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
+                // 개발 초기 단계 임시 설정. 실제 폼 제출(POST) 붙이면 CSRF 토큰을 폼에 반드시 포함시키세요.
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

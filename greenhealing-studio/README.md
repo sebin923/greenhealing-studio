@@ -41,16 +41,29 @@ CREATE DATABASE greenhealing_studio CHARACTER SET utf8mb4;
 
 ```yaml
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: ${DB_PASSWORD:changeme}
+   datasource:
+      url: jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      username: root
+      password: ${DB_PASSWORD:changeme}
+   mail:
+      username: ${MAIL_USERNAME:your-email@gmail.com}
+      password: ${MAIL_PASSWORD:changeme}
 ```
 
 비밀번호는 코드에 직접 적지 말고, 실행 시 환경변수로 주입하는 걸 권장합니다.
 
-- IntelliJ Run Configuration → Environment variables에 `DB_PASSWORD=내비밀번호` 추가
-- 또는 터미널에서 `export DB_PASSWORD=내비밀번호` 후 실행
+- IntelliJ Run Configuration → Environment variables에
+  `DB_PASSWORD=내비밀번호;MAIL_USERNAME=내지메일;MAIL_PASSWORD=구글앱비밀번호` 추가
+- 또는 터미널에서 `export DB_PASSWORD=...` 후 실행
+
+### 이메일 발송(인증코드/비밀번호 재설정) 설정
+
+Gmail 기준으로 안내합니다.
+
+1. 구글 계정 → 보안 → 2단계 인증 활성화
+2. 보안 → 앱 비밀번호(App Passwords) 생성 → 16자리 비밀번호 발급
+3. `MAIL_USERNAME`에는 본인 지메일 주소, `MAIL_PASSWORD`에는 방금 발급받은
+   16자리 앱 비밀번호를 입력 (일반 로그인 비밀번호 아님)
 
 ## 4. 실행
 
@@ -88,6 +101,7 @@ src/main/resources
 - [x] Spring Boot 프로젝트 골격 (Maven, Java 17)
 - [x] JPA 엔티티 설계 (회원/상품/장바구니/주문/클래스예약/주문제작/리뷰)
 - [x] Spring Security + BCrypt 비밀번호 해시, 로그인/회원가입 폼
+- [x] 이메일 중복확인, 이메일 인증(6자리 코드), 비밀번호 찾기(재설정 링크)
 - [x] 상품 목록/상세 최소 화면
 - [ ] 장바구니·결제(테스트 결제) 기능
 - [ ] 클래스 예약(캘린더, 정원 관리) 기능

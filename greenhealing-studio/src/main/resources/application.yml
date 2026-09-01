@@ -23,6 +23,25 @@ spring:
   thymeleaf:
     cache: false
 
+  mail:
+    # Gmail 기준 예시. 구글 계정 > 보안 > 2단계 인증 활성화 후
+    # '앱 비밀번호'를 발급받아 MAIL_PASSWORD로 사용하세요. (일반 로그인 비밀번호 아님)
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:changeme}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  mail:
+    from: ${MAIL_USERNAME:your-email@gmail.com}
+  base-url: http://localhost:8080
+
 server:
   port: 8080
 

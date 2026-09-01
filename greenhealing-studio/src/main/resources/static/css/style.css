@@ -26,3 +26,108 @@ button {
     border-radius: 8px;
     cursor: pointer;
 }
+
+/* ---------- 인증 카드 레이아웃 (로그인/회원가입/비번찾기) ---------- */
+.auth-wrap {
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.auth-header {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    letter-spacing: 3px;
+    padding: 30px 0 10px;
+    align-self: flex-start;
+    margin-left: 6%;
+}
+.auth-stage {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 40px 0 100px;
+}
+.auth-blob {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #DCE7C8, #7FAE72 70%);
+    opacity: .5;
+    top: 20px;
+    filter: blur(2px);
+    z-index: 0;
+}
+.auth-card {
+    position: relative;
+    z-index: 1;
+    width: 380px;
+    background: #fff;
+    border: 1px solid #E4E0D3;
+    border-radius: 10px;
+    padding: 40px 36px;
+    box-shadow: 0 20px 50px rgba(35,52,32,0.08);
+}
+.auth-card h1 {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    text-align: center;
+    margin: 0 0 6px;
+}
+.auth-card .sub {
+    text-align: center;
+    font-size: 12px;
+    color: #7a8371;
+    margin-bottom: 26px;
+}
+.auth-card .field { margin-bottom: 16px; }
+.auth-card label { display: block; font-size: 12px; color: #5b6656; margin-bottom: 6px; }
+.auth-card input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #D8D2C0;
+    border-radius: 6px;
+    font-size: 13px;
+}
+.inline-row { display: flex; gap: 8px; }
+.inline-row input { flex: 1; }
+.small-btn {
+    background: #233420;
+    color: #f4f1e8;
+    border: none;
+    border-radius: 6px;
+    padding: 0 14px;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.small-btn:disabled { background: #B8C2AA; cursor: default; }
+.field-msg { font-size: 11px; margin-top: 6px; }
+.field-msg.ok { color: #3d6b34; }
+.field-msg.err { color: #b5482e; }
+.auth-submit {
+    width: 100%;
+    text-align: center;
+    background: #233420;
+    color: #f4f1e8;
+    padding: 14px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin: 20px 0 18px;
+    cursor: pointer;
+}
+.auth-submit:disabled { background: #B8C2AA; cursor: not-allowed; }
+.auth-foot { text-align: center; font-size: 12px; color: #5b6656; }
+.auth-foot a { color: #233420; font-weight: bold; }
+.auth-row-between {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 4px 0 20px; font-size: 12px; color: #5b6656;
+}
+.auth-row-between a { color: #5b6656; }
+.error-box { color: #b5482e; font-size: 12px; margin-bottom: 14px; text-align: center; }
+.success-box { color: #3d6b34; font-size: 12px; margin-bottom: 14px; text-align: center; }

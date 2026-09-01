@@ -5,19 +5,39 @@
     <title>로그인 - 그린힐링 스튜디오</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<h1>로그인</h1>
-<form th:action="@{/login}" method="post">
-    <div>
-        <label>이메일</label>
-        <input type="email" name="username" required>
+<body style="padding:0;">
+<div class="auth-wrap">
+    <div class="auth-header">GREEN HEALING STUDIO</div>
+    <div class="auth-stage">
+        <div class="auth-blob"></div>
+        <div class="auth-card">
+            <h1>로그인</h1>
+            <p class="sub">그린힐링 스튜디오에 오신 것을 환영합니다</p>
+
+            <p class="error-box" th:if="${param.error}">이메일 또는 비밀번호가 올바르지 않습니다.</p>
+            <p class="success-box" th:if="${param.signup}">회원가입이 완료되었습니다. 로그인해 주세요.</p>
+            <p class="success-box" th:if="${param.reset}">비밀번호가 재설정되었습니다. 다시 로그인해 주세요.</p>
+
+            <form th:action="@{/login}" method="post">
+                <div class="field">
+                    <label>이메일</label>
+                    <input type="email" name="username" placeholder="example@email.com" required>
+                </div>
+                <div class="field">
+                    <label>비밀번호</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="auth-row-between">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:12px;">
+                        <input type="checkbox" name="remember-me" style="width:auto;"> 로그인 상태 유지
+                    </label>
+                    <a th:href="@{/password-reset}">비밀번호 찾기</a>
+                </div>
+                <button type="submit" class="auth-submit">로그인</button>
+            </form>
+            <p class="auth-foot">아직 계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+        </div>
     </div>
-    <div>
-        <label>비밀번호</label>
-        <input type="password" name="password" required>
-    </div>
-    <button type="submit">로그인</button>
-</form>
-<p><a th:href="@{/signup}">회원가입</a></p>
+</div>
 </body>
 </html>
