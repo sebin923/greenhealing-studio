@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name}">상품 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h1 th:text="${product.name}">상품명</h1>
+<p th:text="${product.category}">카테고리</p>
+<p th:text="${product.price} + '원'">가격</p>
+<p th:text="${product.description}">설명</p>
+<p>재고: <span th:text="${product.stock}">0</span>개</p>
+<a th:href="@{/products}">← 목록으로</a>
+</body>
+</html>

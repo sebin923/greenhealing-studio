@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: greenhealing-studio
+
+  datasource:
+    # 로컬 MySQL 기준. 실제 비밀번호는 절대 커밋하지 말고
+    # 환경변수(DB_PASSWORD)나 별도 application-local.yml(.gitignore 처리)로 관리하세요.
+    url: jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: ${DB_PASSWORD:0923}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 개발 초기에는 update로 시작하고, 스키마가 안정되면 validate로 전환 권장
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.hibernate.SQL: debug
