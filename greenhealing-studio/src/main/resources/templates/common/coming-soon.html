@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title} + ' - 그린힐링 스튜디오'">준비 중</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="padding:0;">
+<nav class="site-nav">
+    <a class="logo" th:href="@{/}">Green Healing Studio</a>
+    <div class="menu"><a th:href="@{/}">홈</a></div>
+    <div class="icons">
+        <span sec:authorize="isAuthenticated()" style="display:flex; align-items:center; gap:14px;">
+            <span th:text="${loginUserName} + '님'"></span>
+            <a th:href="@{/logout}" class="logout-link">로그아웃</a>
+        </span>
+        <span sec:authorize="isAnonymous()">
+            <a th:href="@{/login}">로그인</a>
+        </span>
+    </div>
+</nav>
+<div style="text-align:center; padding: 120px 20px;">
+    <h1 style="font-family:Georgia,serif;" th:text="${title}">준비 중</h1>
+    <p style="color:#7a8371;">이 페이지는 아직 개발 중입니다. 조금만 기다려 주세요 🌿</p>
+    <a th:href="@{/}" style="color:#233420;">← 홈으로 돌아가기</a>
+</div>
+</body>
+</html>

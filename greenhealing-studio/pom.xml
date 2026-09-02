@@ -34,6 +34,12 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
+        <!-- Thymeleaf에서 로그인 여부/권한(sec:authorize)을 화면에서 바로 판단하기 위함 -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
         <!-- JPA / DB -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>장바구니 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .cart-wrap { padding: 36px 6% 80px; max-width: 900px; }
+        .cart-row { display:flex; align-items:center; gap:18px; padding:18px 0; border-bottom:1px solid #E4E0D3; }
+        .cart-row .thumb { width:76px; height:76px; border-radius:6px; overflow:hidden; flex-shrink:0;
+            background: radial-gradient(circle at 30% 30%, #E7EFD8, #B9CE9C 70%); }
+        .cart-row .thumb img { width:100%; height:100%; object-fit:cover; }
+        .cart-row .info { flex:1; }
+        .cart-row .name { font-size:14px; font-weight:bold; margin-bottom:4px; }
+        .cart-row .price { font-size:12px; color:#7a8371; }
+        .qty-form { display:flex; align-items:center; gap:6px; }
+        .qty-form input[type=number] { width:56px; padding:8px; border:1px solid #D8D2C0; border-radius:6px; text-align:center; }
+        .qty-form button, .remove-form button {
+            background:#F4F1E8; border:1px solid #D8D2C0; border-radius:6px; padding:8px 12px; font-size:12px; cursor:pointer;
+        }
+        .remove-form button { color:#b5482e; }
+        .subtotal { width:100px; text-align:right; font-size:14px; font-weight:bold; }
+        .summary { margin-top:24px; padding:24px; background:#fff; border:1px solid #E4E0D3; border-radius:10px; }
+        .summary .total-row { display:flex; justify-content:space-between; font-size:18px; font-weight:bold; margin-bottom:18px; }
+        .checkout-btn { display:block; text-align:center; background:#233420; color:#f4f1e8; padding:14px 0;
+            border-radius:8px; text-decoration:none; font-size:14px; letter-spacing:1px; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav class="site-nav">
+    <a class="logo" th:href="@{/}">Green Healing Studio</a>
+    <div class="menu"><a th:href="@{/}">홈</a><a th:href="@{/products}">상품</a></div>
+    <div class="icons"><a th:href="@{/mypage}">마이페이지</a></div>
+</nav>
+
+<div class="cart-wrap">
+    <h1 style="font-family:Georgia,serif; font-size:26px; margin-bottom:24px;">장바구니</h1>
+
+    <div th:if="${#lists.isEmpty(items)}" style="padding:60px 0; text-align:center; color:#7a8371;">
+        장바구니가 비어 있습니다. <a th:href="@{/products}" style="color:#233420;">상품 보러가기 →</a>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(items)}">
+        <div class="cart-row" th:each="item : ${items}">
+            <div class="thumb">
+                <img th:if="${item.product.imageUrl}" th:src="${item.product.imageUrl}" alt="">
+            </div>
+            <div class="info">
+                <div class="name" th:text="${item.product.name}">상품명</div>
+                <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(item.product.price, 0, 'COMMA')} + ' / 개'">단가</div>
+            </div>
+            <!-- 수량 변경 폼: cartItemId(어떤 줄인지) + quantity(몇 개로 바꿀지) 를
+                 CartController.update() 로 보냄. 0 이하로 바꾸면 서비스 쪽에서 자동으로 삭제 처리됨 -->
+            <form class="qty-form" th:action="@{/cart/update}" method="post">
+                <input type="hidden" name="cartItemId" th:value="${item.id}">
+                <input type="number" name="quantity" th:value="${item.quantity}" min="1">
+                <button type="submit">변경</button>
+            </form>
+            <div class="subtotal" th:text="'₩ ' + ${#numbers.formatInteger(item.product.price * item.quantity, 0, 'COMMA')}">0원</div>
+            <form class="remove-form" th:action="@{/cart/remove}" method="post">
+                <input type="hidden" name="cartItemId" th:value="${item.id}">
+                <button type="submit">삭제</button>
+            </form>
+        </div>
+
+        <!-- total 은 CartController 가 (상품가격 × 수량) 다 더해서 미리 계산해준 값 -->
+        <div class="summary">
+            <div class="total-row">
+                <span>총 결제 금액</span>
+                <span th:text="'₩ ' + ${#numbers.formatInteger(total, 0, 'COMMA')}">0원</span>
+            </div>
+            <a th:href="@{/checkout}" class="checkout-btn">주문/결제 하기</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

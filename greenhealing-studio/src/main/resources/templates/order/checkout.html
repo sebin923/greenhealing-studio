@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문/결제 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .checkout-wrap { padding: 36px 6% 80px; display:flex; gap:40px; max-width: 1000px; }
+        .left { flex:1; }
+        .item-row { display:flex; justify-content:space-between; font-size:13px; padding:10px 0; border-bottom:1px solid #EFEBDE; }
+        .field { margin-bottom:16px; }
+        .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:7px; }
+        .field input { width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px; }
+        .right { width:300px; background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:26px; height:fit-content; }
+        .right .total-row { display:flex; justify-content:space-between; font-size:16px; font-weight:bold; margin:16px 0 20px; }
+        .pay-btn { width:100%; background:#233420; color:#f4f1e8; border:none; padding:15px 0; border-radius:8px;
+            font-size:14px; letter-spacing:1px; cursor:pointer; }
+        .note { font-size:11px; color:#8b9382; text-align:center; margin-top:10px; }
+        .error-box { color:#b5482e; font-size:12px; margin-bottom:14px; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav class="site-nav">
+    <a class="logo" th:href="@{/}">Green Healing Studio</a>
+    <div class="menu"><a th:href="@{/}">홈</a><a th:href="@{/cart}">장바구니</a></div>
+    <div class="icons"><a th:href="@{/mypage}">마이페이지</a></div>
+</nav>
+
+<div class="checkout-wrap">
+    <div class="left">
+        <h1 style="font-family:Georgia,serif; font-size:24px; margin-bottom:20px;">주문/결제</h1>
+
+        <!-- items 는 장바구니에 담겨있던 상품들을 OrderController 가 그대로 넘겨준 것.
+             (결제 전이라 아직 CartItem 목록임 - 결제해야 Order/OrderItem 으로 바뀜) -->
+        <h3 style="font-size:15px; margin-bottom:10px;">주문 상품</h3>
+        <div class="item-row" th:each="item : ${items}">
+            <span th:text="${item.product.name} + ' × ' + ${item.quantity}">상품</span>
+            <span th:text="'₩ ' + ${#numbers.formatInteger(item.product.price * item.quantity, 0, 'COMMA')}">0원</span>
+        </div>
+
+        <h3 style="font-size:15px; margin:26px 0 10px;">배송지 정보</h3>
+        <form id="checkoutForm" th:action="@{/checkout}" method="post">
+            <div class="field">
+                <label>받는 사람</label>
+                <input type="text" name="receiverName" th:value="${loginUserNameForForm}" required>
+            </div>
+            <div class="field">
+                <label>연락처</label>
+                <input type="text" name="receiverPhone" th:value="${loginUserPhoneForForm}" placeholder="010-0000-0000" required>
+            </div>
+            <div class="field">
+                <label>배송 주소</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="zipcode" name="zipcode" placeholder="우편번호" readonly style="flex:1; background:#F4F1E8;">
+                    <button type="button" onclick="searchAddress()"
+                            style="white-space:nowrap; padding:0 16px; border:1px solid #233420; background:#233420; color:#f4f1e8; border-radius:6px; font-size:12px; cursor:pointer;">
+                        우편번호 검색
+                    </button>
+                </div>
+                <input type="text" id="address" name="address" placeholder="주소 검색 버튼을 눌러주세요" readonly
+                       style="margin-top:8px; background:#F4F1E8;">
+                <input type="text" id="addressDetail" name="addressDetail" placeholder="상세 주소를 입력해 주세요"
+                       style="margin-top:8px;">
+                <!-- 서버로는 우편번호+주소+상세주소를 하나로 합친 문자열 하나만 보냄.
+                     실제 값은 결제 버튼 누를 때 fillShippingAddress() 가 채워줌 -->
+                <input type="hidden" name="shippingAddress" id="shippingAddress">
+            </div>
+        </form>
+    </div>
+
+    <div class="right">
+        <h3 style="font-size:16px; margin-bottom:16px;">결제 금액</h3>
+        <div class="total-row">
+            <span>총 결제금액</span>
+            <span th:text="'₩ ' + ${#numbers.formatInteger(total, 0, 'COMMA')}">0원</span>
+        </div>
+        <!-- form="checkoutForm" : 이 버튼은 .right 영역 안에 있어서 <form> 밖에 있지만,
+             id로 지정해두면 그 폼을 대신 제출할 수 있음.
+             onclick 이 먼저 실행돼서 주소를 안 채웠으면 제출 자체를 막아버림(return false) -->
+        <button type="submit" form="checkoutForm" class="pay-btn" onclick="return fillShippingAddress()">테스트 결제하기</button>
+        <p class="note">실제 결제가 아닌 테스트 결제입니다</p>
+    </div>
+</div>
+
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    function searchAddress() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 도로명 주소를 우선 사용하고, 없으면 지번 주소 사용
+                const roadAddr = data.roadAddress;
+                const jibunAddr = data.jibunAddress;
+                document.getElementById('zipcode').value = data.zonecode;
+                document.getElementById('address').value = roadAddr || jibunAddr;
+                document.getElementById('addressDetail').focus();
+            }
+        }).open();
+    }
+
+    function fillShippingAddress() {
+        const zip = document.getElementById('zipcode').value;
+        const addr = document.getElementById('address').value;
+        const detail = document.getElementById('addressDetail').value;
+
+        if (!zip || !addr) {
+            alert('우편번호 검색을 통해 주소를 입력해 주세요.');
+            return false;
+        }
+
+        document.getElementById('shippingAddress').value =
+            '[' + zip + '] ' + addr + (detail ? ' ' + detail : '');
+        return true;
+    }
+</script>
+</body>
+</html>

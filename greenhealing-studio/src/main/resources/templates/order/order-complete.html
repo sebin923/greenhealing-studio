@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 완료 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .complete-wrap { max-width: 560px; margin: 0 auto; padding: 80px 20px; text-align:center; }
+        .complete-wrap .check { font-size: 44px; margin-bottom: 20px; }
+        .order-box { text-align:left; background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:24px; margin:28px 0; }
+        .order-box .row { display:flex; justify-content:space-between; font-size:13px; padding:8px 0; }
+        .order-box .row.total { font-weight:bold; font-size:15px; border-top:1px solid #E4E0D3; margin-top:8px; padding-top:14px; }
+        .home-btn { display:inline-block; background:#233420; color:#f4f1e8; padding:13px 30px; border-radius:8px;
+            text-decoration:none; font-size:13px; letter-spacing:1px; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav class="site-nav">
+    <a class="logo" th:href="@{/}">Green Healing Studio</a>
+    <div class="menu"><a th:href="@{/}">홈</a></div>
+</nav>
+
+<div class="complete-wrap">
+    <div class="check">✅</div>
+    <h1 style="font-family:Georgia,serif; font-size:24px;">주문이 완료되었습니다</h1>
+    <p style="color:#7a8371; font-size:13px; margin-top:8px;">테스트 결제가 정상적으로 처리되었습니다.</p>
+
+    <!-- order 는 OrderController.complete() 가 방금 결제 완료된 주문을 통째로 넘겨준 것.
+     order.orderItems 는 그 주문에 담겼던 상품들(OrderItem) 리스트야.
+     item.priceAtOrder 를 쓰는 이유: 나중에 상품 가격이 바뀌어도
+     "주문 당시 가격"이 그대로 남아있어야 하니까 따로 저장해둔 값이야. -->
+<div class="order-box">
+        <div class="row"><span>주문번호</span><span th:text="'#' + ${order.id}">#0</span></div>
+        <div class="row" th:each="item : ${order.orderItems}">
+            <span th:text="${item.product.name} + ' × ' + ${item.quantity}">상품</span>
+            <span th:text="'₩ ' + ${#numbers.formatInteger(item.priceAtOrder * item.quantity, 0, 'COMMA')}">0원</span>
+        </div>
+        <div class="row"><span>받는 사람</span><span th:text="${order.receiverName}">이름</span></div>
+        <div class="row"><span>배송지</span><span th:text="${order.shippingAddress}">주소</span></div>
+        <div class="row total"><span>총 결제금액</span><span th:text="'₩ ' + ${#numbers.formatInteger(order.totalAmount, 0, 'COMMA')}">0원</span></div>
+    </div>
+
+    <a th:href="@{/}" class="home-btn">홈으로 돌아가기</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="padding:0;">
+<div class="auth-wrap">
+    <div class="auth-header">GREEN HEALING STUDIO</div>
+    <div class="auth-stage">
+        <div class="auth-blob" style="background: radial-gradient(circle at 65% 30%, #F1DCC9, #D98E4B 70%);"></div>
+        <div class="auth-card" style="width:420px;">
+            <h1>회원가입</h1>
+            <p class="sub">가입하고 판매·클래스·주문 제작을 한 번에</p>
+
+            <p class="error-box" th:if="${error}" th:text="${error}"></p>
+
+            <form id="signupForm" th:action="@{/signup}" method="post">
+                <div class="field">
+                    <label>이름</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div class="field">
+                    <label>아이디</label>
+                    <div class="inline-row">
+                        <input type="text" id="username" name="username" placeholder="영문/숫자 4~20자" required>
+                        <button type="button" class="small-btn" id="checkUsernameBtn">중복확인</button>
+                    </div>
+                    <div class="field-msg" id="usernameMsg"></div>
+                </div>
+
+                <div class="field">
+                    <label>연락처</label>
+                    <input type="text" name="phone" placeholder="010-0000-0000">
+                </div>
+
+                <div class="field">
+                    <label>이메일</label>
+                    <div class="inline-row">
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                        <button type="button" class="small-btn" id="checkEmailBtn">인증</button>
+                    </div>
+                    <div class="field-msg" id="emailMsg"></div>
+                </div>
+
+                <div class="field" id="verifyRow" style="display:none;">
+                    <label>이메일 인증</label>
+                    <div class="inline-row">
+                        <input type="text" id="code" placeholder="인증번호 6자리" maxlength="6">
+                        <button type="button" class="small-btn" id="verifyCodeBtn">확인</button>
+                    </div>
+                    <div class="field-msg" id="codeMsg"></div>
+                </div>
+
+                <div class="field">
+                    <label>비밀번호</label>
+                    <div class="pw-field">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="pw-toggle" data-target="password" aria-label="비밀번호 표시"></button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>비밀번호 확인</label>
+                    <div class="pw-field">
+                        <input type="password" id="passwordConfirm" required>
+                        <button type="button" class="pw-toggle" data-target="passwordConfirm" aria-label="비밀번호 표시"></button>
+                    </div>
+                    <div class="field-msg" id="pwMsg"></div>
+                </div>
+
+                <button type="submit" class="auth-submit" id="submitBtn" disabled>가입하기</button>
+            </form>
+            <p class="auth-foot">이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a></p>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/password-toggle.js}"></script>
+<script th:inline="javascript">
+    const emailInput = document.getElementById('email');
+    const checkEmailBtn = document.getElementById('checkEmailBtn');
+    const emailMsg = document.getElementById('emailMsg');
+    const verifyRow = document.getElementById('verifyRow');
+    const codeInput = document.getElementById('code');
+    const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+    const codeMsg = document.getElementById('codeMsg');
+    const submitBtn = document.getElementById('submitBtn');
+    const pwInput = document.getElementById('password');
+    const pwConfirmInput = document.getElementById('passwordConfirm');
+    const pwMsg = document.getElementById('pwMsg');
+    const usernameInput = document.getElementById('username');
+    const checkUsernameBtn = document.getElementById('checkUsernameBtn');
+    const usernameMsg = document.getElementById('usernameMsg');
+
+    let usernameChecked = false;
+    let emailChecked = false;
+    let emailVerified = false;
+
+    function setMsg(el, text, ok) {
+        el.textContent = text;
+        el.className = 'field-msg ' + (ok ? 'ok' : 'err');
+    }
+
+    function refreshSubmit() {
+        const pwOk = pwInput.value.length > 0 && pwInput.value === pwConfirmInput.value;
+        submitBtn.disabled = !(usernameChecked && emailChecked && emailVerified && pwOk);
+    }
+
+    checkUsernameBtn.addEventListener('click', async () => {
+        const username = usernameInput.value.trim();
+        if (!username) { setMsg(usernameMsg, '아이디를 입력해 주세요.', false); return; }
+
+        const res = await fetch('/api/auth/check-username?username=' + encodeURIComponent(username));
+        const data = await res.json();
+
+        if (data.available) {
+            setMsg(usernameMsg, '사용 가능한 아이디입니다.', true);
+            usernameChecked = true;
+        } else {
+            setMsg(usernameMsg, '이미 사용 중인 아이디입니다.', false);
+            usernameChecked = false;
+        }
+        refreshSubmit();
+    });
+
+    usernameInput.addEventListener('input', () => {
+        usernameChecked = false;
+        usernameMsg.textContent = '';
+        refreshSubmit();
+    });
+
+    checkEmailBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        if (!email) { setMsg(emailMsg, '이메일을 입력해 주세요.', false); return; }
+
+        const res = await fetch('/api/auth/check-email?email=' + encodeURIComponent(email));
+        const data = await res.json();
+
+        if (data.available) {
+            setMsg(emailMsg, '사용 가능한 이메일입니다.', true);
+            emailChecked = true;
+            verifyRow.style.display = 'block';
+
+            // 중복확인 통과 시 바로 인증번호 발송
+            const sendRes = await fetch('/api/auth/send-verification?email=' + encodeURIComponent(email), { method: 'POST' });
+            const sendData = await sendRes.json();
+            setMsg(codeMsg, sendData.message, sendData.success);
+        } else {
+            setMsg(emailMsg, '이미 사용 중인 이메일입니다.', false);
+            emailChecked = false;
+            verifyRow.style.display = 'none';
+        }
+        emailVerified = false;
+        refreshSubmit();
+    });
+
+    verifyCodeBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const code = codeInput.value.trim();
+        if (!code) { setMsg(codeMsg, '인증번호를 입력해 주세요.', false); return; }
+
+        const res = await fetch('/api/auth/verify-code?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code), { method: 'POST' });
+        const data = await res.json();
+        setMsg(codeMsg, data.message, data.success);
+        emailVerified = data.success;
+        refreshSubmit();
+    });
+
+    emailInput.addEventListener('input', () => {
+        emailChecked = false;
+        emailVerified = false;
+        verifyRow.style.display = 'none';
+        emailMsg.textContent = '';
+        refreshSubmit();
+    });
+
+    pwConfirmInput.addEventListener('input', () => {
+        if (pwConfirmInput.value.length === 0) {
+            pwMsg.textContent = '';
+        } else if (pwInput.value === pwConfirmInput.value) {
+            setMsg(pwMsg, '비밀번호가 일치합니다.', true);
+        } else {
+            setMsg(pwMsg, '비밀번호가 일치하지 않습니다.', false);
+        }
+        refreshSubmit();
+    });
+    pwInput.addEventListener('input', () => { pwConfirmInput.dispatchEvent(new Event('input')); });
+</script>
+</body>
+</html>

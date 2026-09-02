@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name}">상품 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .detail-wrap { display:flex; gap:50px; padding:36px 6% 60px; }
+        .detail-wrap .gal { width:420px; flex-shrink:0; }
+        .detail-wrap .gal .main {
+            width:420px; height:420px; border-radius:6px; overflow:hidden;
+            background: radial-gradient(circle at 30% 30%, #E7EFD8, #B9CE9C 70%);
+        }
+        .detail-wrap .gal .main img { width:100%; height:100%; object-fit:cover; }
+        .info { flex:1; padding-top:8px; }
+        .info .cat { font-size:12px; color:#8b9382; margin-bottom:8px; letter-spacing:1px; }
+        .info h1 { font-family:Georgia,serif; font-size:28px; margin-bottom:14px; }
+        .info .price { font-size:20px; margin-bottom:8px; }
+        .info .stock { font-size:12px; color:#7a8371; margin-bottom:20px; }
+        .info .desc { font-size:13px; line-height:1.9; color:#4b5847; margin-bottom:26px; }
+        .qty-box { display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+        .qty-box input { width:70px; padding:10px; border:1px solid #D8D2C0; border-radius:6px; text-align:center; }
+        .cta-row { display:flex; gap:12px; }
+        .cta-row button, .cta-row a.btn {
+            flex:1; text-align:center; padding:14px 0; border-radius:8px; font-size:14px; letter-spacing:1px;
+            border:1.5px solid #233420; cursor:pointer; background:transparent; color:#233420; text-decoration:none;
+        }
+        .cta-row .solid { background:#233420; color:#f4f1e8; }
+        .back-link { display:block; padding: 20px 6% 0; font-size:12px; color:#7a8371; text-decoration:none; }
+    </style>
+</head>
+<body style="padding:0;">
+<!-- 상품 상세 페이지: 홈에서 상품 카드를 클릭하거나
+     /products/{id} 로 직접 접속했을 때 여기로 옴 (ProductController.detail()) -->
+<nav class="site-nav">
+    <a class="logo" th:href="@{/}">Green Healing Studio</a>
+    <div class="menu"><a th:href="@{/}">홈</a><a th:href="@{/products}">상품</a></div>
+    <div class="icons"><a th:href="@{/login}">로그인</a></div>
+</nav>
+
+<a th:href="@{/products}" class="back-link">← 목록으로</a>
+
+<div class="detail-wrap">
+    <div class="gal">
+        <div class="main">
+            <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" alt="">
+        </div>
+    </div>
+    <div class="info">
+        <div class="cat" th:text="${product.category}">카테고리</div>
+        <!-- product.studio.name : 이 상품을 판매하는 공방 이름을 함께 보여줌
+             (여러 공방이 입점하는 구조라서, 어느 공방 상품인지 표시하는 게 중요함) -->
+        <div style="font-size:12px; color:#7FAE72; margin-bottom:6px;" th:text="'공방: ' + ${product.studio.name}">공방명</div>
+        <h1 th:text="${product.name}">상품명</h1>
+        <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(product.price, 0, 'COMMA')}">0원</div>
+        <div class="stock" th:text="'재고 ' + ${product.stock} + '개'">재고</div>
+        <div class="desc" th:text="${product.description}">설명</div>
+
+        <!-- 장바구니 담기 폼. 여기서 담으면(redirectTo=/cart) 바로 장바구니 화면으로 이동함
+             (목록 페이지에서 담을 때는 redirectTo=/products 라서 그 자리에 그대로 머무름) -->
+        <form th:action="@{/cart/add}" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}">
+            <input type="hidden" name="redirectTo" value="/cart">
+            <div class="qty-box">
+                <label style="font-size:12px; color:#5b6656;">수량</label>
+                <input type="number" name="quantity" value="1" min="1" th:max="${product.stock}">
+            </div>
+            <div class="cta-row" sec:authorize="isAuthenticated()">
+                <button type="submit">장바구니 담기</button>
+            </div>
+        </form>
+        <div class="cta-row" sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" class="btn solid">로그인 후 담기</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
