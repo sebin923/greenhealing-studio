@@ -1,5 +1,6 @@
 package com.greenhealing.studio.common.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,7 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    // 로그인 성공 시 역할별로 다른 화면으로 보내주는 핸들러 (별도 클래스로 분리해둠)
+    private final RoleBasedLoginSuccessHandler roleBasedLoginSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -23,7 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products", "/products/**",
                                 "/signup", "/login", "/classes", "/classes/**", "/custom-order", "/community", "/about",
-                                "/notice", "/faq", "/terms", "/privacy", "/studio-signup",
+                                "/notice", "/notice/**", "/faq", "/terms", "/privacy", "/studio-signup",
                                 "/password-reset", "/password-reset/**", "/api/auth/**").permitAll()
                         .requestMatchers("/studio-admin/**").hasRole("STUDIO_ADMIN")
                         .requestMatchers("/platform-admin/**").hasRole("SUPER_ADMIN")
@@ -31,7 +36,9 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        // defaultSuccessUrl("/", true) 대신 커스텀 핸들러를 붙여서
+                        // 로그인한 사람의 권한에 따라 다른 화면으로 보내도록 함
+                        .successHandler(roleBasedLoginSuccessHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll())

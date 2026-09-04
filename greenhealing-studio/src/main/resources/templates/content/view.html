@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${content.title}">약관</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    .content-wrap { padding: 36px 6% 80px; max-width: 800px; }
+    .content-wrap h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid #E4E0D3; }
+    .content-wrap .body { font-size:13px; line-height:1.9; color:#4b5847; white-space:pre-line; }
+  </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="content-wrap">
+  <h1 th:text="${content.title}">제목</h1>
+  <div class="body" th:text="${content.body}">내용</div>
+</div>
+
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

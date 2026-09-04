@@ -3,76 +3,81 @@ package com.greenhealing.studio.product.controller;
 import com.greenhealing.studio.product.domain.Product;
 import com.greenhealing.studio.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 상품 목록/상세 화면을 담당하는 컨트롤러.
- * "컨트롤러"는 브라우저의 요청(GET /products 같은 것)을 받아서,
- * 필요한 데이터를 조회한 뒤, 어떤 화면(html)을 보여줄지 정해주는 역할이야.
  */
 @Controller
-@RequiredArgsConstructor // final 필드(productRepository)를 자동으로 생성자 주입해줌 (롬복 기능)
+@RequiredArgsConstructor
 public class ProductController {
 
-    // 상품 카테고리는 아직 관리자 페이지가 없어서 일단 코드에 고정값으로 넣어둠.
-    // 나중에 공방마다 카테고리를 자유롭게 등록하게 되면 DB에서 조회하는 방식으로 바꿔야 함.
-    private static final List<String> CATEGORIES = List.of("완제품", "재료", "키트");
+    private static final int PAGE_SIZE = 12; // 한 페이지에 보여줄 상품 개수
+
+    // 나중에 공방마다 카테고리를 자유롭게 등록하게 되면 DB에서 조회하는 방식으로 바꿔야 함
+    private static final List<String> CATEGORIES = List.of("완제품", "키트");
 
     private final ProductRepository productRepository;
 
     /**
      * 상품 목록 화면.
-     * 예) /products?keyword=러그&category=완제품 처럼 검색어/카테고리를
-     * 쿼리 파라미터로 받아서 필터링된 결과를 보여줌.
-     * 둘 다 없으면 그냥 전체 목록을 보여줌.
+     * page 파라미터로 몇 번째 페이지인지 받고(0부터 시작), 한 번에 12개씩 끊어서 보여줌.
+     * 예) /products?category=완제품&page=1  -> 완제품 카테고리의 두 번째 페이지(13~24번째 상품)
      */
     @GetMapping("/products")
     public String list(@RequestParam(required = false) String keyword,
                        @RequestParam(required = false) String category,
+                       @RequestParam(defaultValue = "0") int page,
                        Model model) {
-        // isBlank()는 null이거나 공백만 있는 문자열("", "   ")도 true로 처리해줌
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         boolean hasCategory = category != null && !category.isBlank();
 
-        List<Product> products;
-        // 검색어+카테고리 둘 다 있으면 -> 둘 다 만족하는 것만
+        // id 역순(최신 등록순)으로 정렬해서, 12개 단위로 잘라 보여줌
+        PageRequest pageable = PageRequest.of(page, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<Product> result;
         if (hasKeyword && hasCategory) {
-            products = productRepository.findByCategoryAndNameContaining(category, keyword);
-        // 검색어만 있으면 -> 이름에 검색어가 포함된 것만
+            result = productRepository.findByCategoryAndNameContaining(category, keyword, pageable);
         } else if (hasKeyword) {
-            products = productRepository.findByNameContaining(keyword);
-        // 카테고리만 있으면 -> 그 카테고리인 것만
+            result = productRepository.findByNameContaining(keyword, pageable);
         } else if (hasCategory) {
-            products = productRepository.findByCategory(category);
-        // 아무 조건도 없으면 -> 전체 상품
+            result = productRepository.findByCategory(category, pageable);
         } else {
-            products = productRepository.findAll();
+            result = productRepository.findAll(pageable);
         }
 
-        // model.addAttribute(이름, 값) : 화면(html)에서 ${이름} 으로 꺼내 쓸 수 있게 데이터를 실어보내는 것
-        model.addAttribute("products", products);
-        model.addAttribute("keyword", keyword);               // 검색창에 입력했던 값을 그대로 유지하기 위해
-        model.addAttribute("selectedCategory", category);     // 드롭다운에서 선택된 카테고리를 유지하기 위해
-        model.addAttribute("categories", CATEGORIES);         // 드롭다운 옵션 목록
+        // 왼쪽 사이드바에 "완제품 (16)" 처럼 카테고리별 개수를 같이 보여주기 위해 미리 세어둠
+        Map<String, Long> categoryCounts = new LinkedHashMap<>();
+        for (String c : CATEGORIES) {
+            categoryCounts.put(c, productRepository.countByCategory(c));
+        }
 
-        // "product/list" 는 templates/product/list.html 파일을 보여주라는 뜻
+        model.addAttribute("products", result.getContent());  // 이번 페이지에 보여줄 12개(혹은 이하)
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", result.getTotalPages());
+        model.addAttribute("totalCount", result.getTotalElements());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("categories", CATEGORIES);
+        model.addAttribute("categoryCounts", categoryCounts);
         return "product/list";
     }
 
-    /**
-     * 상품 상세 화면.
-     * 예) /products/3 으로 들어오면 id=3 인 상품 정보를 조회해서 보여줌.
-     */
+    /** 상품 상세 (누구나 조회 가능) */
     @GetMapping("/products/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("product", productRepository.findById(id)
-                // findById는 Optional을 반환하니까, 없으면 예외를 던지도록 처리
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다.")));
         return "product/detail";
     }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공방 관리자 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#233420; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { padding:14px 28px; font-size:13px; color:#cfd9c8; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:10px; }
+        .admin-main p { font-size:13px; color:#7a8371; margin-bottom:30px; }
+        .todo-list { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:24px; max-width:520px; }
+        .todo-list li { font-size:13px; color:#4b5847; padding:8px 0; border-bottom:1px solid #EFEBDE; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>공방 관리자</div>
+        <div class="item">공방 정보</div>
+        <a class="item" th:href="@{/studio-admin/products}" style="color:#cfd9c8; text-decoration:none;">상품 관리</a>
+        <div class="item">클래스 관리</div>
+        <div class="item">주문 관리</div>
+        <div class="item">주문제작 관리</div>
+        <div class="item">매출 현황</div>
+        <div class="item" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">
+            <a th:href="@{/logout}" style="color:#cfd9c8;">로그아웃</a>
+        </div>
+    </div>
+    <div class="admin-main">
+        <h1 th:text="${loginUserName} + ' 님, 안녕하세요'">공방 관리자님, 안녕하세요</h1>
+        <p>공방 관리자 전용 화면입니다. 아래 기능은 순차적으로 구현될 예정입니다.</p>
+        <ul class="todo-list">
+            <li>공방 정보 수정 (소개·주소·연락처·운영시간)</li>
+            <li>클래스 등록·수정·삭제, 예약자 확인</li>
+            <li>주문 확인 및 배송 상태 변경</li>
+            <li>주문제작 요청 확인 및 견적 작성</li>
+            <li>매출 현황 (일별/월별)</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

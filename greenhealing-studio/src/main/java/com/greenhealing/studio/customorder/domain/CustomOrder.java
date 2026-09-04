@@ -37,6 +37,7 @@ public class CustomOrder extends BaseTimeEntity {
     private String designImageUrl;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String requestNote;
 
     @Enumerated(EnumType.STRING)

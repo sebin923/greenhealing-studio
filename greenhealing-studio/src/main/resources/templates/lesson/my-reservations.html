@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 예약 내역 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .res-wrap { display:flex; flex-wrap:wrap; gap:30px; padding: 36px 6% 80px; align-items:flex-start; }
+
+        /* ===== 왼쪽: 달력 (더 크게, 화면 크기에 맞춰 유동적으로) ===== */
+        .cal-box {
+            background:#fff; border:1px solid #E4E0D3; border-radius:12px; padding:28px;
+            width:420px; max-width:100%; flex:1 1 380px; /* 좁아지면 오른쪽 목록 위로 자연스럽게 내려감 */
+        }
+        .cal-title { font-family:Georgia,serif; font-size:20px; margin-bottom:20px; text-align:center; }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; text-align:center; }
+        .cal-dow { font-size:12px; color:#8b9382; padding-bottom:8px; }
+        .cal-day {
+            position:relative; padding:14px 0; border-radius:8px;
+            font-size: clamp(13px, 1.6vw, 15px); color:#4b5847;
+        }
+        .cal-day.out { color:#D8D2C0; }
+        .cal-day.has-item { background:#EAF0E3; color:#233420; font-weight:bold; }
+        .cal-day .dot { display:block; font-size: clamp(9px, 1vw, 11px); color:#7FAE72; margin-top:3px; }
+
+        /* ===== 오른쪽: 상세 목록 ===== */
+        .res-list { flex:2 1 400px; min-width:0; }
+        .res-row { display:flex; flex-wrap:wrap; align-items:center; gap:18px; padding:18px 0; border-bottom:1px solid #E4E0D3; }
+        .res-row .info { flex:1 1 200px; min-width:0; }
+        .res-row .studio { font-size:11px; color:#7FAE72; margin-bottom:4px; }
+        .res-row .title { font-size:14px; font-weight:bold; margin-bottom:4px; }
+        .res-row .meta { font-size:12px; color:#7a8371; }
+        .status { font-size:11px; padding:4px 12px; border-radius:999px; }
+        .status.confirmed { background:#E7EFD8; color:#3d6b34; }
+        .status.canceled { background:#F1EDE3; color:#B8B2A0; }
+        .cancel-form button { background:#fff; border:1px solid #e0c4bd; color:#b5482e; border-radius:6px; padding:8px 14px; font-size:12px; cursor:pointer; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div style="padding:36px 6% 0;">
+    <h1 style="font-family:Georgia,serif; font-size:24px;">내 예약 내역</h1>
+</div>
+
+<div class="res-wrap">
+    <!-- ===== 왼쪽: 이번 달 달력 (예약이 있는 날짜만 초록색으로 표시, 클릭 기능은 없고 한눈에 보는 용도) ===== -->
+    <div class="cal-box">
+        <div class="cal-title" th:text="${calendarMonthLabel}">2026년 9월</div>
+        <div class="cal-grid">
+            <div class="cal-dow">일</div><div class="cal-dow">월</div><div class="cal-dow">화</div>
+            <div class="cal-dow">수</div><div class="cal-dow">목</div><div class="cal-dow">금</div><div class="cal-dow">토</div>
+
+            <th:block th:each="week : ${calendarWeeks}">
+                <div th:each="day : ${week}"
+                     th:classappend="${!day.inMonth ? 'out' : (day.count > 0 ? 'has-item' : '')}"
+                     class="cal-day">
+                    <span th:text="${day.dayOfMonth}">1</span>
+                    <span class="dot" th:if="${day.count > 0}" th:text="${day.count} + '건'"></span>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+    <!-- ===== 오른쪽: 예약 상세 목록 (기존과 동일한 카드 리스트) ===== -->
+    <div class="res-list">
+        <div th:if="${#lists.isEmpty(reservations)}" style="padding:60px 0; text-align:center; color:#7a8371;">
+            예약 내역이 없습니다. <a th:href="@{/classes}" style="color:#233420;">클래스 보러가기 →</a>
+        </div>
+
+        <div class="res-row" th:each="r : ${reservations}">
+            <div class="info">
+                <div class="studio" th:text="${r.classSchedule.studio.name}">공방명</div>
+                <div class="title" th:text="${r.classSchedule.title}">클래스명</div>
+                <div class="meta"
+                     th:text="${#temporals.format(r.classSchedule.classDate, 'yyyy.MM.dd')} + ' ' + ${r.classSchedule.startTime} + ' ~ ' + ${r.classSchedule.endTime}">
+                    일시
+                </div>
+            </div>
+
+            <span class="status confirmed" th:if="${r.status.name() == 'CONFIRMED'}">예약확정</span>
+            <span class="status canceled" th:if="${r.status.name() == 'CANCELED'}">취소됨</span>
+
+            <form class="cancel-form" th:if="${r.status.name() == 'CONFIRMED'}"
+                  th:action="@{'/reservations/' + ${r.id} + '/cancel'}" method="post">
+                <button type="submit">취소</button>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

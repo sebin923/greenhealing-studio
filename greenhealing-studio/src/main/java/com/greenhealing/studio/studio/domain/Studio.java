@@ -27,6 +27,7 @@ public class Studio extends BaseTimeEntity {
     private String name;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     // 플랫폼 관리자가 입점 신청을 승인하기 전까지는 상품/클래스가 노출되지 않음

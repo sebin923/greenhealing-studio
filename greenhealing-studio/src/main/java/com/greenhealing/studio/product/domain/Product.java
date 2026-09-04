@@ -36,6 +36,7 @@ public class Product extends BaseTimeEntity {
     private int stock;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private String imageUrl;
@@ -60,5 +61,20 @@ public class Product extends BaseTimeEntity {
 
     public void updateStock(int stock) {
         this.stock = stock;
+    }
+
+    /** 공방 관리자가 상품 정보를 수정할 때 씀 (등록 후 내용을 통째로 갈아끼움) */
+    public void update(String name, String category, int price, int stock, String description, String imageUrl) {
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.stock = stock;
+        this.description = description;
+        this.imageUrl = imageUrl;
+    }
+
+    /** 이 상품이 정말 이 공방(studio) 소유가 맞는지 확인할 때 씀 (다른 공방 상품을 몰래 수정 못 하게) */
+    public boolean belongsTo(Studio studio) {
+        return this.studio.getId().equals(studio.getId());
     }
 }

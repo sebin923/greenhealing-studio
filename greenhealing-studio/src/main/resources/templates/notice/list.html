@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .notice-wrap { padding: 36px 6% 80px; max-width: 800px; }
+        .notice-row { display:block; padding:18px 4px; border-bottom:1px solid #E4E0D3; text-decoration:none; color:inherit; }
+        .notice-row .title { font-size:14px; font-weight:bold; margin-bottom:4px; }
+        .notice-row .date { font-size:12px; color:#8b9382; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="notice-wrap">
+    <h1 style="font-family:Georgia,serif; font-size:24px; margin-bottom:24px;">공지사항</h1>
+
+    <div th:if="${#lists.isEmpty(notices)}" style="padding:60px 0; text-align:center; color:#7a8371;">
+        등록된 공지사항이 없습니다.
+    </div>
+
+    <a class="notice-row" th:each="n : ${notices}" th:href="@{'/notice/' + ${n.id}}">
+        <div class="title" th:text="${n.title}">공지 제목</div>
+        <div class="date" th:text="${#temporals.format(n.createdAt, 'yyyy.MM.dd')}">날짜</div>
+    </a>
+</div>
+
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

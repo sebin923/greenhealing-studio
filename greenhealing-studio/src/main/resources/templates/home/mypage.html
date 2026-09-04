@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .mypage-wrap { padding: 36px 6% 80px; max-width: 900px; }
+        .mypage-header { display:flex; align-items:center; gap:16px; margin-bottom:32px; }
+        .mypage-header .avatar {
+            width:56px; height:56px; border-radius:50%;
+            background: radial-gradient(circle at 35% 30%, #DCE7C8, #517A45);
+            color:#fff; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:center;
+        }
+        .mypage-header .name { font-family:Georgia,serif; font-size:20px; }
+        .mypage-header .email { font-size:12px; color:#7a8371; }
+
+        .quick-links { display:flex; gap:12px; margin-bottom:40px; flex-wrap:wrap; }
+        .quick-links a {
+            padding:10px 18px; border:1px solid #D8D2C0; border-radius:999px; font-size:13px;
+            color:#4b5847; text-decoration:none;
+        }
+        .quick-links a:hover { background:#F4F1E8; }
+
+        .section-h { font-family:Georgia,serif; font-size:17px; margin-bottom:16px; }
+        .fav-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:18px; }
+        .fav-card { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:20px; }
+        .fav-card .name { font-family:Georgia,serif; font-size:16px; margin-bottom:8px; }
+        .fav-card .desc { font-size:12px; color:#7a8371; line-height:1.6; margin-bottom:14px; }
+        .fav-card form button {
+            width:100%; padding:8px 0; background:#F4F1E8; color:#b5482e; border:1px solid #e0c4bd;
+            border-radius:6px; font-size:12px; cursor:pointer;
+        }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="mypage-wrap">
+    <div class="mypage-header">
+        <!-- loginUserInitial / loginUserName 은 GlobalControllerAdvice가 모든 화면에 자동으로 채워주는 값이야 -->
+        <div class="avatar" th:text="${loginUserInitial}">?</div>
+        <div>
+            <div class="name" th:text="${loginUserName} + '님'">회원님</div>
+        </div>
+    </div>
+
+    <div class="quick-links">
+        <a th:href="@{/reservations}">클래스 예약 내역</a>
+        <a th:href="@{/products}">상품 둘러보기</a>
+    </div>
+
+    <div class="section-h">관심 공방</div>
+    <div th:if="${#lists.isEmpty(favoriteStudios)}" style="padding:40px 0; text-align:center; color:#7a8371;">
+        아직 즐겨찾기한 공방이 없습니다. <a th:href="@{/}" style="color:#233420;">홈에서 공방 둘러보기 →</a>
+    </div>
+    <div class="fav-grid" th:if="${not #lists.isEmpty(favoriteStudios)}">
+        <div class="fav-card" th:each="s : ${favoriteStudios}">
+            <div class="name" th:text="${s.name}">공방명</div>
+            <div class="desc" th:text="${s.description}">공방 소개</div>
+            <!-- 마이페이지에서 즐겨찾기 해제하면, 다시 마이페이지로 돌아오게 redirectTo를 지정함 -->
+            <form th:action="@{'/studios/' + ${s.id} + '/favorite'}" method="post">
+                <input type="hidden" name="redirectTo" value="/mypage">
+                <button type="submit">즐겨찾기 해제</button>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

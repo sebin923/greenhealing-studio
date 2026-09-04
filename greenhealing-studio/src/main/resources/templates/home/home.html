@@ -4,62 +4,51 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>그린힐링 스튜디오</title>
-    <!-- th:href="@{/css/style.css}" 는 "URL 경로"를 만들어주는 문법이야.
-         파일이 어느 폴더(templates/home/...)에 있든 상관없이
-         언제나 브라우저 기준 절대경로(/css/style.css)로 변환돼. -->
+    <title>그린힐링 스튜디오 - 터프팅 공방 마켓</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* ===== 입점 공방 소개 섹션 ===== */
+        .studio-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:20px; padding:0 6% 60px; }
+        .studio-card { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:22px; }
+        .studio-card .badge {
+            display:inline-block; font-size:10px; color:#7FAE72; border:1px solid #DCE7C8;
+            border-radius:999px; padding:3px 10px; margin-bottom:12px;
+        }
+        .studio-card .name { font-family:Georgia,serif; font-size:17px; margin-bottom:8px; }
+        .studio-card .desc { font-size:12px; color:#7a8371; line-height:1.6; }
+        .cta-banner {
+            margin:0 6% 60px; padding:30px; border-radius:12px; text-align:center;
+            background:#EAF0E3; border:1px solid #DCE7C8;
+        }
+        .cta-banner p { font-size:13px; color:#4b5847; margin-bottom:14px; }
+        .cta-banner a {
+            display:inline-block; background:#233420; color:#f4f1e8; padding:12px 26px;
+            border-radius:999px; text-decoration:none; font-size:13px; letter-spacing:.5px;
+        }
+    </style>
 </head>
 <body style="padding:0;">
 
 <!-- ===== 상단 네비게이션 바 ===== -->
-<nav class="site-nav">
-    <!-- @{/} 는 "사이트 최상위 주소(localhost:8080/)" 를 의미해.
-         HomeController의 @GetMapping("/") 와 연결돼 있어. -->
-    <a class="logo" th:href="@{/}">Green Healing Studio</a>
-    <div class="menu">
-        <a th:href="@{/}" class="active">홈</a>
-        <a th:href="@{/products}">상품</a>
-        <a th:href="@{/classes}">클래스</a>
-        <a th:href="@{/custom-order}">주문제작</a>
-        <a th:href="@{/community}">커뮤니티</a>
-        <a th:href="@{/about}">소개</a>
-    </div>
-    <div class="icons">
-        <!-- 로그인 상태일 때: 프로필(아바타+이름) → 마이페이지, 옆에 로그아웃 -->
-        <span sec:authorize="isAuthenticated()" style="display:flex; align-items:center; gap:14px;">
-            <a th:href="@{/mypage}" class="profile-chip">
-                <span class="profile-avatar" th:text="${loginUserInitial}">?</span>
-                <span th:text="${loginUserName} + '님'">회원님</span>
-            </a>
-            <a th:href="@{/cart}" class="cart-link">장바구니</a>
-        </span>
-        <!-- 비로그인 상태일 때 -->
-        <span sec:authorize="isAnonymous()">
-            <a th:href="@{/login}">로그인</a>
-            <a th:href="@{/signup}">회원가입</a>
-        </span>
-    </div>
-</nav>
+<nav th:replace="~{common/fragments :: nav(active='home')}"></nav>
 
-<!-- ===== 히어로(첫 화면 큰 배너) 영역 ===== -->
-<!-- 로그인 전/후 문구를 다르게 보여주려고 같은 자리에 2개씩 겹쳐 써놓고,
-     sec:authorize 로 둘 중 하나만 화면에 남기는 방식이야. -->
+<!-- ===== 히어로(첫 화면 큰 배너) 영역 =====
+     "여러 공방이 모인 플랫폼"이라는 성격이 드러나도록 문구를 손봤어.
+     (예전엔 "하나의 공방을 운영합니다" 느낌이었는데, 지금은
+     "여러 공방이 입점한 마켓" 느낌으로 바뀜) -->
 <section class="hero">
     <div class="hill1"></div>
     <div class="hill2"></div>
     <div class="copy">
-        <div class="tag" sec:authorize="isAnonymous()">터프팅으로 일상을 늑이는 공방</div>
+        <div class="tag" sec:authorize="isAnonymous()">여러 터프팅 공방이 모인 곳</div>
         <div class="tag" sec:authorize="isAuthenticated()">다시 오신 것을 환영해요</div>
 
         <h1 class="headline" sec:authorize="isAnonymous()">Green Healing Studio</h1>
         <h1 class="headline" sec:authorize="isAuthenticated()">
-            <!-- ${loginUserName} 은 GlobalControllerAdvice 가 로그인한 사람 이름을
-                 자동으로 채워주는 값이야. 컨트롤러에서 따로 안 넣어줘도 항상 쓸 수 있어. -->
             <span th:text="${loginUserName}"></span>님, 안녕하세요
         </h1>
 
-        <p class="sub" sec:authorize="isAnonymous()">자연의 색을 담아, 나만의 공간을 만듭니다.</p>
+        <p class="sub" sec:authorize="isAnonymous()">여러 공방의 상품·클래스·주문제작을 한곳에서 만나보세요.</p>
         <p class="sub" sec:authorize="isAuthenticated()">오늘도 그린힐링 스튜디오에서 힐링해 보세요.</p>
 
         <a sec:authorize="isAnonymous()" th:href="@{/classes}" class="cta">클래스 예약하기</a>
@@ -87,61 +76,65 @@
     </a>
 </div>
 
+<!-- ===== 입점 공방 소개 (신규) =====
+     여러 공방이 함께한다는 걸 눈으로 보여주는 섹션.
+     studios 는 HomeController가 "승인된 공방만" 걸러서 넘겨준 리스트야. -->
+<div class="section-title">
+    <h2>함께하는 공방들</h2>
+</div>
+<div th:if="${not #lists.isEmpty(studios)}" class="studio-grid">
+    <div class="studio-card" th:each="s : ${studios}">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div class="badge">입점 공방</div>
+            <!-- 로그인한 사람에게만 즐겨찾기 별 버튼을 보여줌.
+                 favoriteStudioIds(내가 즐겨찾기한 공방 id 모음)에 이 공방 id가 있으면 채워진 별★, 없으면 빈 별☆ -->
+            <form sec:authorize="isAuthenticated()" th:action="@{'/studios/' + ${s.id} + '/favorite'}" method="post">
+                <input type="hidden" name="redirectTo" value="/">
+                <button type="submit" th:text="${favoriteStudioIds.contains(s.id)} ? '★' : '☆'"
+                        th:style="${favoriteStudioIds.contains(s.id)} ? 'color:#D98E4B;' : 'color:#B8C2AA;'"
+                        style="background:none; border:none; font-size:18px; cursor:pointer; padding:0;"
+                        th:title="${favoriteStudioIds.contains(s.id)} ? '즐겨찾기 해제' : '즐겨찾기 추가'">☆</button>
+            </form>
+        </div>
+        <div class="name" th:text="${s.name}">공방명</div>
+        <div class="desc" th:text="${s.description}">공방 소개</div>
+    </div>
+</div>
+<p class="empty-note" th:if="${#lists.isEmpty(studios)}">
+    아직 입점한 공방이 없습니다.
+</p>
+
+<!-- 공방 운영자를 위한 입점 신청 유도 배너 -->
+<div class="cta-banner">
+    <p>터프팅 공방을 운영하고 계신가요? 그린힐링 스튜디오에 입점하고 더 많은 고객을 만나보세요.</p>
+    <a th:href="@{/studio-signup}">공방 입점 신청하기</a>
+</div>
+
 <div class="section-title">
     <h2>신상품</h2>
     <a th:href="@{/products}">더보기 →</a>
 </div>
 
-<!-- ===== 신상품 4개 (HomeController 에서 최신순으로 4개만 넘겨줌) ===== -->
-<!-- th:each 는 자바의 for문이랑 똑같아: newProducts 리스트를 하나씩 꺼내서
-     product 라는 이름으로 반복문 안에서 쓰는 거야. -->
+<!-- ===== 신상품 4개 (여러 공방 상품이 섞여서 최신순으로 나옴) ===== -->
 <div class="product-grid" th:if="${not #lists.isEmpty(newProducts)}">
     <div class="product-card" th:each="product : ${newProducts}">
-        <!-- 상품 하나하나의 상세페이지로 가는 링크. id를 문자열에 이어붙여서 만듦 -->
         <a th:href="@{'/products/' + ${product.id}}">
             <div class="thumb">
                 <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" alt="">
             </div>
+            <!-- 어느 공방 상품인지 표시 (여러 공방이 섞여있으니 꼭 필요) -->
+            <div style="font-size:11px; color:#7FAE72; margin-bottom:2px;" th:text="${product.studio.name}">공방명</div>
             <div class="name" th:text="${product.name}">상품명</div>
             <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(product.price, 0, 'COMMA')}">0원</div>
         </a>
     </div>
 </div>
-<!-- 상품이 하나도 없을 때(=DB가 비어있을 때) 보여줄 안내문 -->
 <p class="empty-note" th:if="${#lists.isEmpty(newProducts)}">
-    아직 등록된 상품이 없습니다. DBeaver나 관리자 페이지에서 상품을 등록해 주세요.
+    아직 등록된 상품이 없습니다.
 </p>
 
-<!-- ===== 하단 푸터 ===== -->
-<footer class="site-footer">
-    <div class="footer-top">
-        <div class="footer-brand">
-            <div class="logo">GREEN HEALING STUDIO</div>
-            <p>손으로 심어 완성하는 나만의 그린 러그.<br>터프팅 공방 그린힐링 스튜디오입니다.</p>
-            <div class="footer-sns">
-                <a href="#" title="Instagram">IG</a>
-                <a href="#" title="Blog">B</a>
-            </div>
-        </div>
-        <div class="footer-col">
-            <h4>고객센터</h4>
-            <p>평일 10:00 - 18:00</p>
-            <p>(점심시간 12:30 - 13:30)</p>
-            <p>주말·공휴일 휴무</p>
-            <a th:href="@{/faq}">자주 묻는 질문</a>
-        </div>
-        <div class="footer-col">
-            <h4>이용안내</h4>
-            <a th:href="@{/notice}">공지사항</a>
-            <a th:href="@{/terms}">이용약관</a>
-            <a th:href="@{/privacy}">개인정보처리방침</a>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <span>© 2026 Green Healing Studio. All rights reserved.</span>
-        <span class="disclaimer">본 사이트는 경동대학교 컴퓨터공학과 캡스톤 프로젝트로 제작되었습니다.</span>
-    </div>
-</footer>
+<!-- ===== 하단 푸터 (플랫폼 성격에 맞게 개편) ===== -->
+<footer th:replace="~{common/fragments :: footer}"></footer>
 
 </body>
 </html>

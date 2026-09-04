@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 관리 - 공방 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#233420; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { padding:14px 28px; font-size:13px; color:#cfd9c8; text-decoration:none; display:block; }
+        .admin-side .item.on { background:#3a5230; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+        .admin-top h1 { font-family:Georgia,serif; font-size:22px; }
+        .new-btn { background:#233420; color:#f4f1e8; padding:10px 20px; border-radius:8px; text-decoration:none; font-size:13px; }
+        table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #E4E0D3; border-radius:10px; overflow:hidden; }
+        th { text-align:left; font-size:11px; color:#8b9382; padding:14px 18px; background:#F4F1E8; }
+        td { font-size:13px; padding:14px 18px; border-top:1px solid #EFEBDE; }
+        .row-actions a, .row-actions button {
+            font-size:12px; padding:6px 12px; border-radius:6px; border:1px solid #D8D2C0;
+            background:#fff; color:#4b5847; text-decoration:none; cursor:pointer; margin-right:6px;
+        }
+        .row-actions button.danger { color:#b5482e; border-color:#e0c4bd; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>공방 관리자</div>
+        <a class="item on" th:href="@{/studio-admin/products}">상품 관리</a>
+        <a class="item" th:href="@{/studio-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <div class="admin-top">
+            <h1 th:text="${studio.name} + ' 상품 관리'">상품 관리</h1>
+            <a class="new-btn" th:href="@{/studio-admin/products/new}">+ 상품 등록</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(products)}" style="padding:60px 0; text-align:center; color:#7a8371;">
+            아직 등록한 상품이 없습니다.
+        </div>
+
+        <table th:if="${not #lists.isEmpty(products)}">
+            <tr><th>상품명</th><th>카테고리</th><th>가격</th><th>재고</th><th>관리</th></tr>
+            <tr th:each="p : ${products}">
+                <td th:text="${p.name}">상품명</td>
+                <td th:text="${p.category}">카테고리</td>
+                <td th:text="'₩ ' + ${#numbers.formatInteger(p.price, 0, 'COMMA')}">가격</td>
+                <td th:text="${p.stock} + '개'">재고</td>
+                <td class="row-actions">
+                    <a th:href="@{'/studio-admin/products/' + ${p.id} + '/edit'}">수정</a>
+                    <form th:action="@{'/studio-admin/products/' + ${p.id} + '/delete'}" method="post" style="display:inline;"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                        <button type="submit" class="danger">삭제</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>

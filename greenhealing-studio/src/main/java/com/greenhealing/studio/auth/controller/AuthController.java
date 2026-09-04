@@ -26,7 +26,8 @@ public class AuthController {
     }
 
     @GetMapping("/signup")
-    public String signupPage() {
+    public String signupPage(Model model) {
+        model.addAttribute("initialType", "customer"); // 페이지 처음 열릴 때 "일반 회원가입" 탭을 기본으로 보여줌
         return "auth/signup"; // templates/auth/signup.html
     }
 
@@ -39,6 +40,7 @@ public class AuthController {
                          Model model) {
         if (!emailVerificationService.isVerified(email)) {
             model.addAttribute("error", "이메일 인증을 먼저 완료해 주세요.");
+            model.addAttribute("initialType", "customer"); // 에러로 되돌아갔을 때도 같은 탭이 보이게
             return "auth/signup";
         }
         try {
@@ -46,6 +48,7 @@ public class AuthController {
             return "redirect:/login?signup=success";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("initialType", "customer");
             return "auth/signup";
         }
     }

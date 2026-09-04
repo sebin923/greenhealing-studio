@@ -7,7 +7,7 @@
 </head>
 <body style="padding:0;">
 <div class="auth-wrap">
-    <div class="auth-header">GREEN HEALING STUDIO</div>
+    <a class="auth-header" th:href="@{/}" style="text-decoration:none; color:inherit;">GREEN HEALING STUDIO</a>
     <div class="auth-stage">
         <div class="auth-blob"></div>
         <div class="auth-card">
@@ -16,6 +16,9 @@
 
             <p class="error-box" th:if="${param.error}">아이디 또는 비밀번호가 올바르지 않습니다.</p>
             <p class="success-box" th:if="${param.signup}">회원가입이 완료되었습니다. 로그인해 주세요.</p>
+            <p class="success-box" th:if="${param.studioSignup}">
+                공방 가입 신청이 완료되었습니다. 플랫폼 관리자 승인 후 이용하실 수 있습니다.
+            </p>
             <p class="success-box" th:if="${param.reset}">비밀번호가 재설정되었습니다. 다시 로그인해 주세요.</p>
 
             <form th:action="@{/login}" method="post">
@@ -38,10 +41,14 @@
                 </div>
                 <button type="submit" class="auth-submit">로그인</button>
             </form>
-            <p class="auth-foot">아직 계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+            <p class="auth-foot">
+                아직 계정이 없으신가요? <a th:href="@{/signup}">회원가입</a><br>
+                공방을 운영하고 계신가요? <a th:href="@{/studio-signup}">공방 회원가입</a>
+            </p>
         </div>
     </div>
 </div>
 <script th:src="@{/js/password-toggle.js}"></script>
+<footer th:replace="~{common/fragments :: footer-simple}"></footer>
 </body>
 </html>

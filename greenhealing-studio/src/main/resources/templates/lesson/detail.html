@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>클래스 예약 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .lesson-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:22px; padding:0 6% 60px; }
+        .lesson-card { background:#fff; border:1px solid #E4E0D3; border-radius:10px; overflow:hidden; text-decoration:none; color:inherit; display:block; }
+        .lesson-card .thumb { height:140px; background: radial-gradient(circle at 30% 30%, #E7EFD8, #B9CE9C 70%); }
+        .lesson-card .body { padding:18px; }
+        .lesson-card .studio { font-size:11px; color:#7FAE72; margin-bottom:6px; }
+        .lesson-card .title { font-size:15px; font-weight:bold; margin-bottom:8px; }
+        .lesson-card .meta { font-size:12px; color:#7a8371; margin-bottom:4px; }
+        .lesson-card .price { font-size:14px; font-weight:bold; margin-top:10px; }
+        .badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:999px; margin-top:10px; }
+        .badge.open { background:#E7EFD8; color:#3d6b34; }
+        .badge.few { background:#F1DCC9; color:#8A4A24; }
+        .badge.full { background:#F1EDE3; color:#B8B2A0; }
+
+        /* ===== 달력 (더 크게, 화면 크기에 맞춰 유동적으로) ===== */
+        .cal-wrap { padding: 0 6% 30px; }
+        .cal-box {
+            background:#fff; border:1px solid #E4E0D3; border-radius:12px; padding:32px;
+            max-width:720px; width:100%; /* 최대 720px까지 커지되, 화면이 좁으면 100% 폭으로 줄어듦 */
+        }
+        .cal-title { font-family:Georgia,serif; font-size:22px; margin-bottom:22px; text-align:center; }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; text-align:center; }
+        .cal-dow { font-size:13px; color:#8b9382; padding-bottom:10px; }
+        .cal-day {
+            position:relative; padding:16px 0; border-radius:10px;
+            font-size: clamp(13px, 1.6vw, 16px); /* 화면 크기에 따라 글자 크기가 부드럽게 변함 */
+            color:#4b5847; cursor:default;
+        }
+        .cal-day.out { color:#D8D2C0; }
+        .cal-day.has-item { cursor:pointer; background:#EAF0E3; color:#233420; font-weight:bold; }
+        .cal-day.has-item:hover { background:#DCE7C8; }
+        .cal-day.selected { outline:2px solid #233420; outline-offset:-2px; }
+        .cal-day .dot { display:block; font-size: clamp(9px, 1vw, 11px); color:#7FAE72; margin-top:4px; }
+        .cal-reset { display:inline-block; margin-top:18px; font-size:13px; color:#7a8371; cursor:pointer; text-decoration:underline; }
+
+        /* 화면이 좁아지면 달력 안쪽 여백/글자를 한 번 더 줄여서 칸이 찌그러지지 않게 함 */
+        @media (max-width: 600px) {
+            .cal-box { padding:18px; }
+            .cal-day { padding:10px 0; }
+        }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='classes')}"></nav>
+
+<div style="padding: 36px 6% 20px;">
+    <h1 style="font-family:Georgia,serif; font-size:26px; margin-bottom:8px;">클래스 예약</h1>
+    <p style="font-size:13px; color:#7a8371; margin-bottom:26px;">여러 공방의 원데이클래스를 한곳에서 확인하고 예약해 보세요.</p>
+</div>
+
+<!-- ===== 이번 달 달력: 클래스가 있는 날짜만 초록색으로 표시되고, 클릭하면 아래 카드 목록이 그 날짜만 필터링됨 ===== -->
+<div class="cal-wrap">
+    <div class="cal-box">
+        <div class="cal-title" th:text="${calendarMonthLabel}">2026년 9월</div>
+        <div class="cal-grid">
+            <div class="cal-dow">일</div>
+            <div class="cal-dow">월</div>
+            <div class="cal-dow">화</div>
+            <div class="cal-dow">수</div>
+            <div class="cal-dow">목</div>
+            <div class="cal-dow">금</div>
+            <div class="cal-dow">토</div>
+
+            <!-- weeks(주) 안에 days(요일)가 들어있는 이중 반복문 -->
+            <th:block th:each="week : ${calendarWeeks}">
+                <div th:each="day : ${week}"
+                     th:classappend="${!day.inMonth ? 'out' : (day.count > 0 ? 'has-item' : '')}"
+                     th:attr="data-date=${#temporals.format(day.date, 'yyyy-MM-dd')},data-count=${day.count}"
+                     onclick="handleDayClick(this)"
+                     class="cal-day">
+                    <span th:text="${day.dayOfMonth}">1</span>
+                    <span class="dot" th:if="${day.count > 0}" th:text="${day.count} + '건'"></span>
+                </div>
+            </th:block>
+        </div>
+        <span class="cal-reset" id="calReset" onclick="resetFilter()" style="display:none;">전체 보기로 돌아가기</span>
+    </div>
+</div>
+
+<div th:if="${#lists.isEmpty(classes)}" style="padding:60px 6%; text-align:center; color:#7a8371;">
+    예정된 클래스가 없습니다.
+</div>
+
+<!-- 카드마다 data-date 속성을 심어두고, 달력에서 날짜를 클릭하면 JS가 이 속성을 기준으로 보이기/숨기기만 함
+     (서버에 다시 요청 안 하고 화면 안에서 바로 필터링되는 방식) -->
+<div class="lesson-grid" id="lessonGrid">
+    <a class="lesson-card" th:each="c : ${classes}" th:href="@{'/classes/' + ${c.id}}"
+       th:with="remain=${c.capacity - c.reservedCount}"
+       th:attr="data-date=${#temporals.format(c.classDate, 'yyyy-MM-dd')}">
+        <div class="thumb"></div>
+        <div class="body">
+            <div class="studio" th:text="${c.studio.name}">공방명</div>
+            <div class="title" th:text="${c.title}">클래스명</div>
+            <div class="meta" th:text="${#temporals.format(c.classDate, 'yyyy.MM.dd')} + ' (' + ${c.startTime} + ' ~ ' + ${c.endTime} + ')'">일시</div>
+            <div class="meta" th:text="'정원 ' + ${c.reservedCount} + ' / ' + ${c.capacity} + '명'">정원</div>
+            <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(c.price, 0, 'COMMA')}">가격</div>
+
+            <span class="badge full" th:if="${remain <= 0}">마감</span>
+            <span class="badge few" th:if="${remain > 0 and remain <= 1}">마감임박</span>
+            <span class="badge open" th:if="${remain > 1}">예약가능</span>
+        </div>
+    </a>
+</div>
+
+<script th:inline="javascript">
+    const lessonGrid = document.getElementById('lessonGrid');
+    const calReset = document.getElementById('calReset');
+
+    /** 달력 칸을 클릭했을 때: count(그 날짜 클래스 개수)가 0이면 아무 것도 안 하고, 있으면 필터링 실행 */
+    function handleDayClick(el) {
+        const count = parseInt(el.dataset.count, 10);
+        if (!count || count <= 0) return; // 클래스가 없는 날짜는 클릭해도 무시
+        filterByDate(el.dataset.date);
+    }
+
+    /** 달력에서 날짜를 클릭했을 때: 그 날짜 카드만 남기고 나머지는 숨김 */
+    function filterByDate(dateStr) {
+        // 달력 칸 선택 표시 갱신
+        document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
+        const clicked = document.querySelector('.cal-day[data-date="' + dateStr + '"]');
+        if (clicked) clicked.classList.add('selected');
+
+        // 카드 보이기/숨기기
+        lessonGrid.querySelectorAll('.lesson-card').forEach(card => {
+            card.style.display = (card.dataset.date === dateStr) ? '' : 'none';
+        });
+        calReset.style.display = 'inline-block';
+    }
+
+    /** "전체 보기로 돌아가기" 눌렀을 때: 필터 해제 */
+    function resetFilter() {
+        document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
+        lessonGrid.querySelectorAll('.lesson-card').forEach(card => { card.style.display = ''; });
+        calReset.style.display = 'none';
+    }
+</script>
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

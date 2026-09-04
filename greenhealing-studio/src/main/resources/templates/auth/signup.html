@@ -1,22 +1,57 @@
 <!DOCTYPE html>
+<!--
+  회원가입 화면 - 하나의 페이지 안에 "일반 회원가입" / "공방 회원가입" 탭이 있고,
+  버튼을 누르면 JS로 폼 내용과 제출 주소(action)만 바꿔치기하는 방식이야.
+
+  뒤에서 처리하는 컨트롤러/서비스는 그대로 2개(AuthController, StudioSignupController)로
+  나뉘어 있어. 화면만 하나로 합친 거지, "가입 신청 데이터를 어떻게 저장하는지"는
+  일반 회원과 공방 회원이 아예 다른 로직이라 굳이 억지로 합치지 않았어.
+-->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>회원가입 - 그린힐링 스튜디오</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* ===== 탭 버튼 스타일 ===== */
+        .type-tabs { display:flex; gap:8px; margin-bottom:24px; background:#F4F1E8; border-radius:999px; padding:4px; }
+        .type-tab {
+            flex:1; text-align:center; padding:10px 0; border-radius:999px; font-size:13px; cursor:pointer;
+            color:#5b6656; transition:all .15s;
+        }
+        .type-tab.selected { background:#233420; color:#f4f1e8; font-weight:bold; }
+        /* 공방 전용 필드/안내문구는 기본적으로 숨겨두고, JS가 필요할 때만 보여줌 */
+        .studio-only { display:none; }
+    </style>
 </head>
 <body style="padding:0;">
 <div class="auth-wrap">
-    <div class="auth-header">GREEN HEALING STUDIO</div>
+    <a class="auth-header" th:href="@{/}" style="text-decoration:none; color:inherit;">GREEN HEALING STUDIO</a>
     <div class="auth-stage">
-        <div class="auth-blob" style="background: radial-gradient(circle at 65% 30%, #F1DCC9, #D98E4B 70%);"></div>
-        <div class="auth-card" style="width:420px;">
-            <h1>회원가입</h1>
-            <p class="sub">가입하고 판매·클래스·주문 제작을 한 번에</p>
+        <div class="auth-blob" id="authBlob" style="background: radial-gradient(circle at 65% 30%, #F1DCC9, #D98E4B 70%);"></div>
+        <div class="auth-card" style="width:440px;">
+
+            <!-- ===== 탭 버튼: 클릭하면 아래 switchType() 가 실행됨 ===== -->
+            <div class="type-tabs">
+                <div class="type-tab" id="tabCustomer" onclick="switchType('customer')">일반 회원가입</div>
+                <div class="type-tab" id="tabStudio" onclick="switchType('studio')">공방 회원가입</div>
+            </div>
+
+            <h1 id="formTitle">회원가입</h1>
+            <p class="sub" id="formSub">가입하고 판매·클래스·주문 제작을 한 번에</p>
+
+            <!-- 공방 탭을 선택했을 때만 보이는 승인 안내 -->
+            <p class="studio-only" id="approvalNotice"
+               style="background:#EAF0E3; color:#233420; font-size:12px; padding:12px 14px; border-radius:6px; margin-bottom:16px; text-align:center;">
+                가입 신청 후 플랫폼 관리자의 승인이 필요합니다.
+            </p>
 
             <p class="error-box" th:if="${error}" th:text="${error}"></p>
 
-            <form id="signupForm" th:action="@{/signup}" method="post">
+            <!-- action은 처음엔 비워두고, 페이지가 열리자마자 JS(switchType)가 채워넣음 -->
+            <form id="signupForm" method="post"
+                  th:attr="data-customer-url=@{/signup},data-studio-url=@{/studio-signup}">
+
                 <div class="field">
                     <label>이름</label>
                     <input type="text" name="name" required>
@@ -70,6 +105,23 @@
                     <div class="field-msg" id="pwMsg"></div>
                 </div>
 
+                <!-- ===== 공방 탭에서만 보이는 필드 (studio-only 클래스) =====
+                     "일반" 탭일 땐 화면에서 숨겨질 뿐 아니라, JS에서 disabled 처리도 해줘야
+                     (숨겨져 있어도 required 값이 남아있으면 제출이 막히니까) -->
+                <div class="studio-only" id="studioFields">
+                    <hr style="border:none; border-top:1px solid #E4E0D3; margin:20px 0;">
+                    <div class="field">
+                        <label>공방명</label>
+                        <input type="text" id="studioName" name="studioName" placeholder="예: 그린힐링 스튜디오">
+                    </div>
+                    <div class="field">
+                        <label>공방 소개</label>
+                        <textarea id="studioDescription" name="studioDescription" rows="3"
+                                  placeholder="어떤 공방인지 간단히 소개해 주세요"
+                                  style="width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px; resize:vertical;"></textarea>
+                    </div>
+                </div>
+
                 <button type="submit" class="auth-submit" id="submitBtn" disabled>가입하기</button>
             </form>
             <p class="auth-foot">이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a></p>
@@ -79,6 +131,56 @@
 
 <script th:src="@{/js/password-toggle.js}"></script>
 <script th:inline="javascript">
+    // 서버가 넘겨준 initialType("customer" 또는 "studio")을 JS 변수로 그대로 가져옴.
+    // 컨트롤러에서 지정 안 해주면(=null) 기본값 customer로 처리
+    const initialType = /*[[${initialType}]]*/ 'customer';
+
+    const tabCustomer = document.getElementById('tabCustomer');
+    const tabStudio = document.getElementById('tabStudio');
+    const formTitle = document.getElementById('formTitle');
+    const formSub = document.getElementById('formSub');
+    const approvalNotice = document.getElementById('approvalNotice');
+    const studioFields = document.getElementById('studioFields');
+    const studioNameInput = document.getElementById('studioName');
+    const signupForm = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const authBlob = document.getElementById('authBlob');
+
+    let currentType = 'customer';
+
+    /** 탭 버튼을 누르거나, 페이지가 처음 열릴 때 화면을 그 모드에 맞게 바꿔주는 함수 */
+    function switchType(type) {
+        currentType = type;
+
+        // 탭 버튼 강조 표시 토글
+        tabCustomer.classList.toggle('selected', type === 'customer');
+        tabStudio.classList.toggle('selected', type === 'studio');
+
+        if (type === 'studio') {
+            formTitle.textContent = '공방 회원가입';
+            formSub.textContent = '그린힐링 스튜디오에 공방을 입점해 보세요';
+            approvalNotice.style.display = 'block';
+            studioFields.style.display = 'block';
+            studioNameInput.required = true; // 공방 탭일 때만 공방명을 필수로
+            signupForm.action = signupForm.dataset.studioUrl; // POST /studio-signup 으로 제출되게
+            submitBtn.textContent = '가입 신청하기';
+            authBlob.style.background = 'radial-gradient(circle at 65% 30%, #DCE7C8, #7FAE72 70%)';
+        } else {
+            formTitle.textContent = '회원가입';
+            formSub.textContent = '가입하고 판매·클래스·주문 제작을 한 번에';
+            approvalNotice.style.display = 'none';
+            studioFields.style.display = 'none';
+            studioNameInput.required = false; // 숨겨진 상태에서 required면 제출이 막히므로 꼭 꺼줘야 함
+            signupForm.action = signupForm.dataset.customerUrl; // POST /signup 으로 제출되게
+            submitBtn.textContent = '가입하기';
+            authBlob.style.background = 'radial-gradient(circle at 65% 30%, #F1DCC9, #D98E4B 70%)';
+        }
+    }
+
+    // 페이지가 열리자마자, 컨트롤러가 정해준 초기 탭으로 세팅
+    switchType(initialType);
+
+    // ===== 아래는 아이디/이메일 중복확인, 이메일 인증, 비밀번호 확인 로직 (탭과 무관하게 공통) =====
     const emailInput = document.getElementById('email');
     const checkEmailBtn = document.getElementById('checkEmailBtn');
     const emailMsg = document.getElementById('emailMsg');
@@ -86,7 +188,6 @@
     const codeInput = document.getElementById('code');
     const verifyCodeBtn = document.getElementById('verifyCodeBtn');
     const codeMsg = document.getElementById('codeMsg');
-    const submitBtn = document.getElementById('submitBtn');
     const pwInput = document.getElementById('password');
     const pwConfirmInput = document.getElementById('passwordConfirm');
     const pwMsg = document.getElementById('pwMsg');
@@ -143,7 +244,6 @@
             emailChecked = true;
             verifyRow.style.display = 'block';
 
-            // 중복확인 통과 시 바로 인증번호 발송
             const sendRes = await fetch('/api/auth/send-verification?email=' + encodeURIComponent(email), { method: 'POST' });
             const sendData = await sendRes.json();
             setMsg(codeMsg, sendData.message, sendData.success);
@@ -188,5 +288,6 @@
     });
     pwInput.addEventListener('input', () => { pwConfirmInput.dispatchEvent(new Event('input')); });
 </script>
+<footer th:replace="~{common/fragments :: footer-simple}"></footer>
 </body>
 </html>

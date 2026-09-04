@@ -1,4 +1,5 @@
 * { box-sizing: border-box; }
+html { font-size: 16px; }
 body {
     font-family: "Pretendard", "Apple SD Gothic Neo", Arial, sans-serif;
     background: #FBFAF5;
@@ -6,6 +7,7 @@ body {
     margin: 0;
     padding: 40px;
 }
+img, svg { max-width: 100%; height: auto; }
 header { margin-bottom: 30px; }
 header h1 { font-family: Georgia, serif; letter-spacing: 2px; }
 nav a { margin-right: 16px; color: #233420; text-decoration: none; }
@@ -17,6 +19,7 @@ input {
     border: 1px solid #D8D2C0;
     border-radius: 6px;
     width: 280px;
+    max-width: 100%; /* 화면이 좁아지면 부모 크기를 넘지 않고 같이 줄어듦 */
 }
 button {
     background: #233420;
@@ -25,6 +28,11 @@ button {
     padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
+}
+
+/* 화면이 작아졌을 때 전체적으로 여백을 줄여서 글자가 밀리지 않게 함 */
+@media (max-width: 600px) {
+    body { padding: 20px; }
 }
 
 /* ---------- 인증 카드 레이아웃 (로그인/회원가입/비번찾기) ---------- */
@@ -48,12 +56,14 @@ button {
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 40px 0 100px;
+    padding: 40px 20px 100px; /* 좌우 여백을 줘서 좁은 화면에서 카드가 화면 끝에 붙지 않게 함 */
 }
 .auth-blob {
     position: absolute;
     width: 420px;
     height: 420px;
+    max-width: 90vw;   /* 화면 폭보다 커지지 않도록 상한선을 둠 */
+    max-height: 90vw;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #DCE7C8, #7FAE72 70%);
     opacity: .5;
@@ -65,11 +75,15 @@ button {
     position: relative;
     z-index: 1;
     width: 380px;
+    max-width: 100%; /* 부모(.auth-stage)보다 커지지 않음 */
     background: #fff;
     border: 1px solid #E4E0D3;
     border-radius: 10px;
     padding: 40px 36px;
     box-shadow: 0 20px 50px rgba(35,52,32,0.08);
+}
+@media (max-width: 500px) {
+    .auth-card { padding: 30px 22px; }
 }
 .auth-card h1 {
     font-family: Georgia, serif;
@@ -153,13 +167,18 @@ button {
 .site-nav {
     display: flex; align-items: center; justify-content: space-between;
     padding: 24px 6%; background: #FBFAF5;
+    flex-wrap: wrap; gap: 12px; /* 좁아지면 줄바꿈 (아이콘/로고가 잘리는 대신 아래로 내려감) */
 }
 .site-nav .logo { font-family: Georgia, serif; font-size: 20px; letter-spacing: 1px; color: #233420; text-decoration: none; }
-.site-nav .menu { display: flex; gap: 30px; font-size: 14px; }
+.site-nav .menu { display: flex; gap: 30px; font-size: 14px; flex-wrap: wrap; }
 .site-nav .menu a { color: #233420; text-decoration: none; }
 .site-nav .menu a.active { text-decoration: underline; text-underline-offset: 6px; }
-.site-nav .icons { display: flex; gap: 16px; font-size: 15px; }
+.site-nav .icons { display: flex; gap: 16px; font-size: 15px; flex-wrap: wrap; align-items: center; }
 .site-nav .icons a { color: #233420; text-decoration: none; }
+@media (max-width: 600px) {
+    .site-nav { padding: 16px 5%; }
+    .site-nav .menu { gap: 16px; font-size: 13px; }
+}
 
 .profile-chip {
     display: flex; align-items: center; gap: 8px;
@@ -188,7 +207,7 @@ button {
     background:#517A45; border-radius:50% 50% 0 0 / 100% 100% 0 0; }
 .hero .copy { position:absolute; top:70px; left:0; right:0; text-align:center; z-index:2; }
 .hero .tag { font-family:Arial, sans-serif; font-size:12px; letter-spacing:5px; color:#2c4326; margin-bottom:16px; }
-.hero .headline { font-family: Georgia, serif; font-size:52px; color:#1c2b19; margin:0; }
+.hero .headline { font-family: Georgia, serif; font-size: clamp(28px, 6vw, 52px); color:#1c2b19; margin:0; }
 .hero .sub { margin-top:14px; font-size:14px; color:#2c4326; }
 .hero .cta {
     display:inline-block; margin-top:24px; background:#233420; color:#f4f1e8;
@@ -223,7 +242,6 @@ button {
 
 @media (max-width: 800px) {
     .product-grid { grid-template-columns: repeat(2,1fr); }
-    .hero .headline { font-size: 36px; }
 }
 
 /* ---------- 푸터 ---------- */
@@ -234,8 +252,8 @@ button {
 }
 .footer-top {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr;
-    gap: 40px;
+    grid-template-columns: 1.3fr 0.9fr 0.9fr 0.9fr 0.7fr;
+    gap: 30px;
     padding: 50px 6% 30px;
     border-bottom: 1px solid rgba(244,241,232,0.12);
 }
@@ -254,6 +272,14 @@ button {
     padding: 18px 6%; font-size: 11px; color: #8a9481;
 }
 .footer-bottom .disclaimer { color: #6f7a67; }
+
+/* ---------- 간단 푸터 (로그인/회원가입 전용) ---------- */
+.site-nav-simple, .site-footer-simple {
+    text-align: center; padding: 20px; font-size: 12px; color: #8b9382;
+}
+.site-footer-simple { background:#233420; color:#a9b39f; }
+.site-footer-simple a { color:#cfd9c8; text-decoration:none; margin:0 8px; }
+.site-footer-simple .sep { margin: 0 8px; color:#5b6656; }
 @media (max-width: 800px) {
     .footer-top { grid-template-columns: 1fr; }
     .footer-bottom { flex-direction: column; gap: 6px; text-align: center; }

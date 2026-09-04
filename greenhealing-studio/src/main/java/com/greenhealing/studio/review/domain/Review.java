@@ -37,6 +37,7 @@ public class Review extends BaseTimeEntity {
     private int rating; // 1~5
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Builder

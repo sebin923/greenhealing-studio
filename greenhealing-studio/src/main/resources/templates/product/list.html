@@ -4,78 +4,138 @@
     <meta charset="UTF-8">
     <title>상품 목록 - 그린힐링 스튜디오</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* ===== 쇼핑몰 카테고리 사이드바 + 상품 그리드 레이아웃 ===== */
+        .shop-layout { display:flex; gap:36px; padding:36px 6% 60px; align-items:flex-start; }
+
+        .cat-sidebar { width:220px; flex-shrink:0; }
+        .cat-sidebar h3 { font-family:Georgia,serif; font-size:16px; margin-bottom:16px; }
+        .cat-sidebar ul { list-style:none; margin:0; padding:0; }
+        .cat-sidebar li { border-bottom:1px solid #EFEBDE; }
+        .cat-sidebar a {
+            display:flex; justify-content:space-between; padding:12px 4px;
+            color:#4b5847; text-decoration:none; font-size:13px;
+        }
+        .cat-sidebar a:hover { color:#233420; }
+        .cat-sidebar a.active { color:#233420; font-weight:bold; }
+        .cat-sidebar .count { color:#a9b39f; font-size:12px; }
+
+        .shop-main { flex:1; min-width:0; }
+        .shop-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+        .shop-toolbar .total { font-size:13px; color:#7a8371; }
+        .shop-toolbar .total b { color:#233420; }
+        .search-box { display:flex; gap:8px; }
+        .search-box input {
+            flex:1; min-width:160px; padding:10px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
+        }
+        .search-box button {
+            padding:10px 18px; background:#233420; color:#f4f1e8; border:none; border-radius:6px; font-size:12px; cursor:pointer;
+        }
+
+        /* ===== 페이지네이션 ===== */
+        .pagination { display:flex; justify-content:center; gap:6px; margin-top:40px; flex-wrap:wrap; }
+        .pagination a, .pagination span {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:34px; height:34px; border-radius:6px; font-size:13px; text-decoration:none; color:#4b5847;
+        }
+        .pagination a:hover { background:#F4F1E8; }
+        .pagination .current { background:#233420; color:#f4f1e8; font-weight:bold; }
+        .pagination .disabled { color:#D8D2C0; }
+
+        /* 화면이 좁아지면 사이드바가 위로 올라가면서 세로로 쌓임 */
+        @media (max-width: 800px) {
+            .shop-layout { flex-direction:column; }
+            .cat-sidebar { width:100%; }
+            .cat-sidebar ul { display:flex; flex-wrap:wrap; gap:0 18px; }
+            .cat-sidebar li { border-bottom:none; }
+        }
+    </style>
 </head>
 <body style="padding:0;">
-<nav class="site-nav">
-    <!-- 주의: 여기 있는 @{/} , @{/products} 는 "URL 주소" 라서
-         파일이 templates/products/list.html 이든 templates/product/list.html 이든
-         절대 안 바뀌어. 헷갈리기 쉬운 부분이라 남겨둠. -->
-    <a class="logo" th:href="@{/}">Green Healing Studio</a>
-    <div class="menu"><a th:href="@{/}">홈</a><a th:href="@{/products}" class="active">상품</a></div>
-    <div class="icons"><a th:href="@{/login}">로그인</a></div>
-</nav>
+<nav th:replace="~{common/fragments :: nav(active='products')}"></nav>
 
-<div style="padding: 36px 6% 10px;">
-    <h1 style="font-family:Georgia,serif; font-size:26px; margin-bottom:20px;">상품 목록</h1>
+<div class="shop-layout">
+    <!-- ===== 왼쪽: 카테고리 사이드바 ===== -->
+    <aside class="cat-sidebar">
+        <h3>카테고리</h3>
+        <ul>
+            <li>
+                <a th:href="@{/products}"
+                   th:classappend="${selectedCategory == null or selectedCategory == ''} ? 'active' : ''">
+                    <span>전체</span>
+                    <span class="count" th:text="${totalCount}">0</span>
+                </a>
+            </li>
+            <li th:each="c : ${categories}">
+                <a th:href="@{/products(category=${c})}"
+                   th:classappend="${c == selectedCategory} ? 'active' : ''">
+                    <span th:text="${c}">카테고리</span>
+                    <span class="count" th:text="${categoryCounts.get(c)}">0</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
 
-    <!-- ===== 검색·필터 폼 =====
-         method="get" 이라서 검색하면 주소창이
-         /products?keyword=러그&category=완제품 이런 식으로 바뀜.
-         ProductController.list() 가 이 keyword/category 파라미터를 받아서 처리해. -->
-    <form th:action="@{/products}" method="get" style="display:flex; gap:10px; margin-bottom:26px; flex-wrap:wrap;">
-        <input type="text" name="keyword" th:value="${keyword}" placeholder="상품명 검색"
-               style="flex:1; min-width:200px; padding:10px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;">
-        <select name="category" style="padding:10px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;">
-            <option value="" th:selected="${selectedCategory == null or selectedCategory == ''}">전체 카테고리</option>
-            <!-- categories 는 컨트롤러가 넘겨주는 ["완제품","재료","키트"] 고정 목록 -->
-            <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"
-                    th:selected="${c == selectedCategory}"></option>
-        </select>
-        <button type="submit" style="background:#233420; color:#f4f1e8; border:none; border-radius:6px; padding:10px 22px; font-size:13px; cursor:pointer;">검색</button>
-        <a th:if="${keyword != null or selectedCategory != null}" th:href="@{/products}"
-           style="align-self:center; font-size:12px; color:#7a8371; text-decoration:none;">필터 초기화</a>
-    </form>
-
-    <p style="font-size:13px; color:#7a8371; margin-bottom:16px;">
-        총 <span th:text="${#lists.size(products)}">0</span>개 상품
-    </p>
-
-    <div th:if="${#lists.isEmpty(products)}" style="padding: 60px 0; text-align:center; color:#7a8371;">
-        검색 조건에 맞는 상품이 없습니다.
-    </div>
-
-    <!-- ===== 상품 카드 그리드 ===== -->
-    <div class="product-grid" style="padding:0 0 60px;">
-        <div class="product-card" th:each="product : ${products}">
-            <a th:href="@{'/products/' + ${product.id}}">
-                <div class="thumb">
-                    <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" alt="">
-                </div>
-                <div class="name" th:text="${product.name}">상품명</div>
-                <div style="font-size:11px; color:#8b9382; margin-bottom:4px;" th:text="${product.category}">카테고리</div>
-                <!-- product.studio.name : 상품 엔티티에서 연결된 Studio 엔티티의 이름을
-                     "점(.)으로 이어서" 바로 꺼내 쓸 수 있음 (JPA 지연로딩이라 이 화면을 그릴 때 실제 조회됨) -->
-                <div style="font-size:11px; color:#7FAE72; margin-bottom:4px;" th:text="${product.studio.name}">공방명</div>
-                <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(product.price, 0, 'COMMA')}">0원</div>
-            </a>
-            <!-- 장바구니 담기 폼: 로그인한 사람에게만 버튼을 보여줌 (sec:authorize) -->
-            <form th:action="@{/cart/add}" method="post" style="margin-top:8px;">
-                <input type="hidden" name="productId" th:value="${product.id}">
-                <input type="hidden" name="quantity" value="1">
-                <!-- redirectTo: 담은 뒤 어디로 돌아올지. 여기선 목록 페이지에 그대로 머무름 -->
-                <input type="hidden" name="redirectTo" value="/products">
-                <button type="submit" sec:authorize="isAuthenticated()"
-                        style="width:100%; padding:8px 0; background:#F4F1E8; border:1px solid #D8D2C0; border-radius:6px; font-size:12px; cursor:pointer;">
-                    장바구니 담기
-                </button>
+    <!-- ===== 오른쪽: 상품 그리드 ===== -->
+    <div class="shop-main">
+        <div class="shop-toolbar">
+            <div class="total">
+                <b th:text="${selectedCategory} ?: '전체'">전체</b> 상품
+                <b th:text="${totalCount}">0</b>개
+            </div>
+            <form class="search-box" th:action="@{/products}" method="get">
+                <input type="hidden" name="category" th:value="${selectedCategory}">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="상품명 검색">
+                <button type="submit">검색</button>
             </form>
-            <!-- 로그인 안 한 사람에게는 버튼 대신 로그인 유도 링크를 보여줌 -->
-            <a sec:authorize="isAnonymous()" th:href="@{/login}"
-               style="display:block; text-align:center; margin-top:8px; padding:8px 0; background:#F4F1E8; border:1px solid #D8D2C0; border-radius:6px; font-size:12px; color:#5b6656; text-decoration:none;">
-                로그인 후 담기
-            </a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(products)}" style="padding: 60px 0; text-align:center; color:#7a8371;">
+            상품이 없습니다.
+        </div>
+
+        <div class="product-grid" style="padding:0;">
+            <div class="product-card" th:each="product : ${products}">
+                <a th:href="@{'/products/' + ${product.id}}">
+                    <div class="thumb">
+                        <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" alt="">
+                    </div>
+                    <div style="font-size:11px; color:#7FAE72; margin-bottom:2px;" th:text="${product.studio.name}">공방명</div>
+                    <div class="name" th:text="${product.name}">상품명</div>
+                    <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(product.price, 0, 'COMMA')}">0원</div>
+                </a>
+                <form th:action="@{/cart/add}" method="post" style="margin-top:8px;">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="redirectTo" value="/products">
+                    <button type="submit" sec:authorize="isAuthenticated()"
+                            style="width:100%; padding:8px 0; background:#F4F1E8; color:#233420; border:1px solid #D8D2C0; border-radius:6px; font-size:12px; cursor:pointer;">
+                        장바구니 담기
+                    </button>
+                </form>
+                <a sec:authorize="isAnonymous()" th:href="@{/login}"
+                   style="display:block; text-align:center; margin-top:8px; padding:8px 0; background:#F4F1E8; border:1px solid #D8D2C0; border-radius:6px; font-size:12px; color:#5b6656; text-decoration:none;">
+                    로그인 후 담기
+                </a>
+            </div>
+        </div>
+
+        <!-- ===== 페이지네이션: 1 2 3 4 5 ... 식으로 페이지 번호 나열 =====
+             totalPages(전체 페이지 수)만큼 반복문을 돌리기 위해 #numbers.sequence(0, totalPages-1) 사용 -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 0}" th:href="@{/products(category=${selectedCategory}, keyword=${keyword}, page=${currentPage - 1})}">‹</a>
+            <span th:if="${currentPage == 0}" class="disabled">‹</span>
+
+            <th:block th:each="p : ${#numbers.sequence(0, totalPages - 1)}">
+                <span th:if="${p == currentPage}" class="current" th:text="${p + 1}">1</span>
+                <a th:if="${p != currentPage}" th:href="@{/products(category=${selectedCategory}, keyword=${keyword}, page=${p})}" th:text="${p + 1}">1</a>
+            </th:block>
+
+            <a th:if="${currentPage < totalPages - 1}" th:href="@{/products(category=${selectedCategory}, keyword=${keyword}, page=${currentPage + 1})}">›</a>
+            <span th:if="${currentPage == totalPages - 1}" class="disabled">›</span>
         </div>
     </div>
 </div>
+<footer th:replace="~{common/fragments :: footer}"></footer>
 </body>
 </html>

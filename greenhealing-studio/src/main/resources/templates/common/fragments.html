@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!--
+  이 파일은 화면에 직접 렌더링되는 페이지가 아니라,
+  다른 모든 페이지가 "가져다 쓰는" 조각(fragment) 모음이야.
+  th:fragment="이름(파라미터)" 로 이름 붙여두면,
+  다른 페이지에서 th:replace="~{common/fragments :: 이름(값)}" 로 통째로 가져다 쓸 수 있어.
+
+  이렇게 nav/footer를 한 군데로 모아두면, 나중에 메뉴 하나 고칠 때
+  13개 파일을 다 돌아다닐 필요 없이 여기 한 번만 고치면 모든 페이지에 반영돼.
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- ================= 공통 상단 네비게이션 =================
+     active 파라미터로 지금 어느 메뉴에 있는지 넘겨받아서 밑줄(active 클래스) 표시함.
+     예) th:replace="~{common/fragments :: nav(active='products')}" -->
+<nav th:fragment="nav(active)" class="site-nav">
+    <a class="logo" th:href="@{/}">Green Healing Studio</a>
+    <div class="menu">
+        <a th:href="@{/}" th:classappend="${active == 'home'} ? 'active' : ''">홈</a>
+        <a th:href="@{/products}" th:classappend="${active == 'products'} ? 'active' : ''">상품</a>
+        <a th:href="@{/classes}" th:classappend="${active == 'classes'} ? 'active' : ''">클래스</a>
+        <a th:href="@{/custom-order}" th:classappend="${active == 'custom-order'} ? 'active' : ''">주문제작</a>
+        <a th:href="@{/community}" th:classappend="${active == 'community'} ? 'active' : ''">커뮤니티</a>
+        <a th:href="@{/about}" th:classappend="${active == 'about'} ? 'active' : ''">소개</a>
+    </div>
+    <div class="icons">
+        <!-- 로그인 상태: 장바구니 / 내예약 / 프로필칩(누르면 마이페이지) -->
+        <span sec:authorize="isAuthenticated()" style="display:flex; align-items:center; gap:14px;">
+            <a th:href="@{/cart}" class="cart-link">장바구니</a>
+            <a th:href="@{/reservations}">내 예약</a>
+            <a th:href="@{/mypage}" class="profile-chip">
+                <span class="profile-avatar" th:text="${loginUserInitial}">?</span>
+                <span th:text="${loginUserName} + '님'">회원님</span>
+            </a>
+        </span>
+        <!-- 비로그인 상태: 회원가입 / 로그인 -->
+        <span sec:authorize="isAnonymous()">
+            <a th:href="@{/signup}">회원가입</a>
+            <a th:href="@{/login}">로그인</a>
+        </span>
+    </div>
+</nav>
+
+<!-- ================= 공통 하단 푸터 (일반 페이지용, 전체 메뉴 포함) ================= -->
+<footer th:fragment="footer" class="site-footer">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <div class="logo">GREEN HEALING STUDIO</div>
+            <p>여러 터프팅 공방이 모여 상품 판매·클래스 예약·주문제작을<br>한곳에서 제공하는 통합 쇼핑몰 플랫폼입니다.</p>
+            <div class="footer-sns">
+                <a href="#" title="Instagram">IG</a>
+                <a href="#" title="Blog">B</a>
+            </div>
+        </div>
+        <div class="footer-col">
+            <h4>고객센터</h4>
+            <p>평일 10:00 - 18:00</p>
+            <p>(점심시간 12:30 - 13:30)</p>
+            <p>주말·공휴일 휴무</p>
+        </div>
+        <div class="footer-col">
+            <h4>이용안내</h4>
+            <a th:href="@{/notice}">공지사항</a>
+            <a th:href="@{/terms}">이용약관</a>
+            <a th:href="@{/privacy}">개인정보처리방침</a>
+        </div>
+        <div class="footer-col">
+            <h4>공방 파트너</h4>
+            <a th:href="@{/studio-signup}">공방 회원가입</a>
+            <a th:href="@{/login}">공방 로그인</a>
+            <a th:href="@{/studio-admin}">공방 관리자 페이지</a>
+        </div>
+        <div class="footer-col">
+            <h4>관리자</h4>
+            <a th:href="@{/platform-admin}">관리자 페이지</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2026 Green Healing Studio. All rights reserved.</span>
+        <span class="disclaimer">본 사이트는 경동대학교 컴퓨터공학과 캡스톤 프로젝트로 제작되었습니다.</span>
+    </div>
+</footer>
+
+<!-- ================= 간단 푸터 (로그인/회원가입 페이지 전용) ================= -->
+<footer th:fragment="footer-simple" class="site-footer-simple">
+    <a th:href="@{/notice}">공지사항</a>
+    <a th:href="@{/terms}">이용약관</a>
+    <a th:href="@{/privacy}">개인정보처리방침</a>
+    <span class="sep">·</span>
+    <span>© 2026 Green Healing Studio</span>
+</footer>
+
+</body>
+</html>

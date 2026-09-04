@@ -15,10 +15,7 @@
     </style>
 </head>
 <body style="padding:0;">
-<nav class="site-nav">
-    <a class="logo" th:href="@{/}">Green Healing Studio</a>
-    <div class="menu"><a th:href="@{/}">홈</a></div>
-</nav>
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
 
 <div class="complete-wrap">
     <div class="check">✅</div>
@@ -29,7 +26,7 @@
      order.orderItems 는 그 주문에 담겼던 상품들(OrderItem) 리스트야.
      item.priceAtOrder 를 쓰는 이유: 나중에 상품 가격이 바뀌어도
      "주문 당시 가격"이 그대로 남아있어야 하니까 따로 저장해둔 값이야. -->
-<div class="order-box">
+    <div class="order-box">
         <div class="row"><span>주문번호</span><span th:text="'#' + ${order.id}">#0</span></div>
         <div class="row" th:each="item : ${order.orderItems}">
             <span th:text="${item.product.name} + ' × ' + ${item.quantity}">상품</span>
@@ -42,5 +39,6 @@
 
     <a th:href="@{/}" class="home-btn">홈으로 돌아가기</a>
 </div>
+<footer th:replace="~{common/fragments :: footer}"></footer>
 </body>
 </html>

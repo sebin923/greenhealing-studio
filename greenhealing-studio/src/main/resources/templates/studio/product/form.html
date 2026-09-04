@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 등록/수정 - 공방 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-wrap { max-width: 560px; margin: 0 auto; padding: 50px 20px; }
+        .form-wrap h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:28px; }
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:8px; }
+        .field input, .field select, .field textarea {
+            width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
+        }
+        .field textarea { resize:vertical; }
+        .submit-btn { width:100%; background:#233420; color:#f4f1e8; border:none; padding:15px 0;
+            border-radius:8px; font-size:14px; cursor:pointer; margin-top:10px; }
+        .cancel-link { display:block; text-align:center; margin-top:16px; font-size:13px; color:#7a8371; text-decoration:none; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="form-wrap">
+    <!-- product가 null이면 신규 등록, 값이 있으면 수정 모드. formAction/submitLabel은 컨트롤러가 상황에 맞게 미리 계산해서 넘겨줌 -->
+    <h1 th:text="${product != null} ? '상품 수정' : '상품 등록'">상품 등록</h1>
+
+    <!-- th:action="@{${formAction}}" : formAction 변수(문자열)를 그대로 URL로 사용함 -->
+    <form th:action="@{${formAction}}" method="post">
+        <div class="field">
+            <label>상품명</label>
+            <input type="text" name="name" th:value="${product?.name}" required>
+        </div>
+        <div class="field">
+            <label>카테고리</label>
+            <select name="category" required>
+                <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"
+                        th:selected="${product != null and product.category == c}"></option>
+            </select>
+        </div>
+        <div class="field">
+            <label>가격 (원)</label>
+            <input type="number" name="price" th:value="${product?.price}" min="0" required>
+        </div>
+        <div class="field">
+            <label>재고 (개)</label>
+            <input type="number" name="stock" th:value="${product?.stock}" min="0" required>
+        </div>
+        <div class="field">
+            <label>상품 설명</label>
+            <textarea name="description" rows="4" th:text="${product?.description}"></textarea>
+        </div>
+        <div class="field">
+            <label>이미지 경로 (선택, 예: /images/products/xxx.jpg)</label>
+            <input type="text" name="imageUrl" th:value="${product?.imageUrl}">
+        </div>
+
+        <button type="submit" class="submit-btn" th:text="${submitLabel}">등록하기</button>
+    </form>
+    <a class="cancel-link" th:href="@{/studio-admin/products}">← 취소하고 목록으로</a>
+</div>
+</body>
+</html>

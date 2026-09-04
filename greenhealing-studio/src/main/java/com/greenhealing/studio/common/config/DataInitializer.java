@@ -2,8 +2,12 @@ package com.greenhealing.studio.common.config;
 
 import com.greenhealing.studio.auth.domain.User;
 import com.greenhealing.studio.auth.repository.UserRepository;
+import com.greenhealing.studio.content.domain.SiteContent;
+import com.greenhealing.studio.content.repository.SiteContentRepository;
 import com.greenhealing.studio.lesson.domain.ClassSchedule;
 import com.greenhealing.studio.lesson.repository.ClassScheduleRepository;
+import com.greenhealing.studio.notice.domain.Notice;
+import com.greenhealing.studio.notice.repository.NoticeRepository;
 import com.greenhealing.studio.product.domain.Product;
 import com.greenhealing.studio.product.repository.ProductRepository;
 import com.greenhealing.studio.review.domain.Review;
@@ -36,6 +40,8 @@ public class DataInitializer implements CommandLineRunner {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NoticeRepository noticeRepository;
+    private final SiteContentRepository siteContentRepository;
 
     @Override
     public void run(String... args) {
@@ -45,6 +51,72 @@ public class DataInitializer implements CommandLineRunner {
         seedClasses(studios);
         User demoUser = seedDemoCustomer();
         seedReviews(demoUser, products);
+        seedNotices();
+        seedSiteContents();
+    }
+
+    // ---------- 공지사항 ----------
+    private void seedNotices() {
+        if (noticeRepository.count() > 0) {
+            return;
+        }
+        noticeRepository.saveAll(List.of(
+                Notice.builder()
+                        .title("그린힐링 스튜디오 오픈 안내")
+                        .content("여러 터프팅 공방이 함께하는 그린힐링 스튜디오가 오픈했습니다.\n"
+                                + "다양한 공방의 상품과 클래스를 한곳에서 만나보세요.")
+                        .build(),
+                Notice.builder()
+                        .title("공방 입점 신청 안내")
+                        .content("터프팅 공방을 운영하고 계신가요?\n"
+                                + "그린힐링 스튜디오에 입점 신청을 하시면 플랫폼 관리자 검토 후 승인해 드립니다.\n"
+                                + "회원가입 화면에서 '공방 회원가입' 탭을 이용해 주세요.")
+                        .build(),
+                Notice.builder()
+                        .title("테스트 결제 안내")
+                        .content("현재 결제 기능은 실제 결제가 이루어지지 않는 테스트 결제로 운영되고 있습니다.\n"
+                                + "실제 카드 정보나 금액이 청구되지 않으니 안심하고 이용해 주세요.")
+                        .build()
+        ));
+    }
+
+    // ---------- 이용약관 / 개인정보처리방침 ----------
+    private void seedSiteContents() {
+        if (siteContentRepository.count() > 0) {
+            return;
+        }
+        siteContentRepository.saveAll(List.of(
+                SiteContent.builder()
+                        .contentKey(SiteContent.Key.TERMS)
+                        .title("이용약관")
+                        .body("본 약관은 그린힐링 스튜디오(이하 '플랫폼')가 제공하는 서비스의 이용 조건을 정합니다.\n\n"
+                                + "제1조 (목적)\n"
+                                + "본 약관은 플랫폼이 제공하는 상품 판매, 클래스 예약, 주문제작 중개 서비스 이용에 관한 "
+                                + "회원과 플랫폼 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.\n\n"
+                                + "제2조 (회원의 구분)\n"
+                                + "회원은 서비스를 이용하는 소비자, 상품·클래스를 판매하는 공방 관리자, "
+                                + "플랫폼을 운영·관리하는 플랫폼 관리자로 구분됩니다.\n\n"
+                                + "제3조 (면책)\n"
+                                + "본 사이트는 경동대학교 컴퓨터공학과 캡스톤 프로젝트로 제작된 학습용 웹서비스이며, "
+                                + "실제 상거래 목적으로 운영되지 않습니다. 결제는 테스트 결제로만 이루어집니다.\n\n"
+                                + "(이하 약관 내용은 추후 보완될 예정입니다.)")
+                        .build(),
+                SiteContent.builder()
+                        .contentKey(SiteContent.Key.PRIVACY)
+                        .title("개인정보처리방침")
+                        .body("그린힐링 스튜디오(이하 '플랫폼')는 회원의 개인정보를 다음과 같이 처리합니다.\n\n"
+                                + "1. 수집하는 개인정보 항목\n"
+                                + "이름, 아이디, 이메일, 비밀번호(암호화 저장), 연락처, 배송지 주소\n\n"
+                                + "2. 개인정보의 수집 및 이용 목적\n"
+                                + "회원 가입 및 관리, 상품 주문 및 배송, 클래스 예약, 주문제작 신청 처리\n\n"
+                                + "3. 개인정보의 보관\n"
+                                + "비밀번호는 BCrypt 방식으로 해시 처리되어 저장되며, 원문은 저장되지 않습니다.\n\n"
+                                + "4. 고지 사항\n"
+                                + "본 사이트는 경동대학교 컴퓨터공학과 캡스톤 프로젝트로 제작된 학습용 웹서비스입니다. "
+                                + "실제 서비스 운영 목적의 개인정보 처리방침이 아니며, 발표 및 학습 목적으로만 사용됩니다.\n\n"
+                                + "(이하 방침 내용은 추후 보완될 예정입니다.)")
+                        .build()
+        ));
     }
 
     // ---------- 플랫폼 관리자(SUPER_ADMIN) ----------
@@ -88,14 +160,17 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private User createStudioAdmin(String username, String name, String email, String phone) {
-        return userRepository.save(User.builder()
-                .name(name)
-                .username(username)
-                .email(email)
-                .password(passwordEncoder.encode(username + "1234!")) // 로컬 테스트 전용 비밀번호
-                .phone(phone)
-                .role(User.Role.STUDIO_ADMIN)
-                .build());
+        // 이미 같은 아이디의 계정이 있으면(예: studios 테이블만 지우고 users는 안 지운 경우) 새로 만들지 않고 재사용함
+        return userRepository.findByUsername(username).orElseGet(() ->
+                userRepository.save(User.builder()
+                        .name(name)
+                        .username(username)
+                        .email(email)
+                        .password(passwordEncoder.encode(username + "1234!")) // 로컬 테스트 전용 비밀번호
+                        .phone(phone)
+                        .role(User.Role.STUDIO_ADMIN)
+                        .build())
+        );
     }
 
     // ---------- 상품 30개 (공방 3곳에 분산 배치) ----------
@@ -145,7 +220,7 @@ public class DataInitializer implements CommandLineRunner {
                 Product.builder().studio(s1).name("키즈 터프팅 키트").category("키트").price(24000).stock(18)
                         .description("아이들도 안전하게 사용할 수 있는 어린이용 터프팅 키트입니다.").build(),
 
-                // ---------- 포레스트 터프팅(s2) : 완제품 + 재료 ----------
+                // ---------- 포레스트 터프팅(s2) : 완제품 ----------
                 Product.builder().studio(s2).name("웨이브 러그").category("완제품").price(70000).stock(6)
                         .description("물결 무늬로 터프팅한 그린·블루 톤 러그입니다.").build(),
                 Product.builder().studio(s2).name("허니콤 쿠션 커버").category("완제품").price(34000).stock(13)
@@ -158,29 +233,16 @@ public class DataInitializer implements CommandLineRunner {
                         .description("체크무늬로 터프팅한 현관용 발매트입니다.").build(),
                 Product.builder().studio(s2).name("무지개 벽걸이").category("완제품").price(56000).stock(9)
                         .description("무지개 모양으로 터프팅한 벽걸이 인테리어 소품입니다.").build(),
-                Product.builder().studio(s2).name("터프팅 원사 세트 (그린 컬러)").category("재료").price(19000).stock(30)
-                        .description("그린 계열 톤온톤 원사 5색 세트. 자체 작업이나 커스텀 제작 시 활용하기 좋습니다.")
-                        .imageUrl("/images/products/tufting-yarn-set.jpg").build(),
-                Product.builder().studio(s2).name("터프팅 원사 세트 (베이지 컬러)").category("재료").price(19000).stock(28)
-                        .description("베이지·아이보리 계열 톤온톤 원사 5색 세트입니다.").build(),
-                Product.builder().studio(s2).name("터프팅 원사 세트 (파스텔 컬러)").category("재료").price(21000).stock(22)
-                        .description("연핑크·연보라 등 파스텔 톤 원사 5색 세트입니다.").build(),
-                Product.builder().studio(s2).name("모노까이 백킹 원단 (1m)").category("재료").price(12000).stock(40)
-                        .description("터프팅 작업용 모노까이 백킹 원단, 1m 단위 판매입니다.").build(),
                 Product.builder().studio(s2).name("미니 러그 원데이 키트").category("키트").price(35000).stock(16)
                         .description("한 번에 완성할 수 있는 미니 러그 전용 키트입니다.").build(),
 
-                // ---------- 모먼트 클래스룸(s3) : 재료·도구 + 클래스용 키트 ----------
-                Product.builder().studio(s3).name("러그건 (컷파일)").category("재료").price(89000).stock(6)
-                        .description("컷파일 방식의 터프팅 러그건입니다. 초보자도 사용하기 쉽습니다.").build(),
-                Product.builder().studio(s3).name("러그건 (루프파일)").category("재료").price(95000).stock(5)
-                        .description("루프파일 방식의 터프팅 러그건입니다. 도톰한 질감 표현에 좋습니다.").build(),
-                Product.builder().studio(s3).name("터프팅 프레임 (중형)").category("재료").price(45000).stock(9)
-                        .description("60x90cm 작업이 가능한 중형 터프팅 프레임입니다.").build(),
-                Product.builder().studio(s3).name("가위 세트 (전기 클리퍼 포함)").category("재료").price(38000).stock(11)
-                        .description("러그 마감 작업용 가위와 전기 클리퍼가 포함된 세트입니다.").build(),
-                Product.builder().studio(s3).name("글루건 & 라텍스 마감재").category("재료").price(15000).stock(25)
-                        .description("완성된 러그 뒷면 마감용 라텍스와 글루건 세트입니다.").build(),
+                // ---------- 모먼트 클래스룸(s3) : 완제품 + 클래스용 키트 ----------
+                Product.builder().studio(s3).name("리본 매듭 러그").category("완제품").price(62000).stock(9)
+                        .description("리본 매듭 모양이 포인트인 아이보리 톤 러그입니다.").build(),
+                Product.builder().studio(s3).name("데이지 미니 방석").category("완제품").price(29000).stock(16)
+                        .description("데이지 꽃 모양의 미니 방석, 의자나 소파 포인트로 좋습니다.").build(),
+                Product.builder().studio(s3).name("그라데이션 라운드 러그").category("완제품").price(78000).stock(5)
+                        .description("그린 톤 그라데이션이 들어간 원형 러그입니다.").build(),
                 Product.builder().studio(s3).name("쿠션 커버 DIY 키트").category("키트").price(32000).stock(14)
                         .description("쿠션 커버 제작에 필요한 재료가 모두 포함된 키트입니다.").build(),
                 Product.builder().studio(s3).name("커플 클래스 홈키트").category("키트").price(68000).stock(8)
