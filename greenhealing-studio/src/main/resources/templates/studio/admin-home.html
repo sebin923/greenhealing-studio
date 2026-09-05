@@ -22,9 +22,9 @@
         <div class="logo">GREEN HEALING<br>공방 관리자</div>
         <div class="item">공방 정보</div>
         <a class="item" th:href="@{/studio-admin/products}" style="color:#cfd9c8; text-decoration:none;">상품 관리</a>
-        <div class="item">클래스 관리</div>
+        <a class="item" th:href="@{/studio-admin/classes}" style="color:#cfd9c8; text-decoration:none;">클래스 관리</a>
         <div class="item">주문 관리</div>
-        <div class="item">주문제작 관리</div>
+        <a class="item" th:href="@{/studio-admin/custom-orders}" style="color:#cfd9c8; text-decoration:none;">주문제작 관리</a>
         <div class="item">매출 현황</div>
         <div class="item" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">
             <a th:href="@{/logout}" style="color:#cfd9c8;">로그아웃</a>
@@ -35,9 +35,8 @@
         <p>공방 관리자 전용 화면입니다. 아래 기능은 순차적으로 구현될 예정입니다.</p>
         <ul class="todo-list">
             <li>공방 정보 수정 (소개·주소·연락처·운영시간)</li>
-            <li>클래스 등록·수정·삭제, 예약자 확인</li>
+            <li>클래스 예약자 확인</li>
             <li>주문 확인 및 배송 상태 변경</li>
-            <li>주문제작 요청 확인 및 견적 작성</li>
             <li>매출 현황 (일별/월별)</li>
         </ul>
     </div>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공방 관리 - 플랫폼 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#1F4E79; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { padding:14px 28px; font-size:13px; color:#cdd9e6; text-decoration:none; display:block; }
+        .admin-side .item.on { background:#2c6294; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:24px; }
+        .section-h { font-size:15px; font-weight:bold; margin:30px 0 14px; color:#233420; }
+        table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #E4E0D3; border-radius:10px; overflow:hidden; margin-bottom:10px; }
+        th { text-align:left; font-size:11px; color:#8b9382; padding:14px 18px; background:#F4F1E8; }
+        td { font-size:13px; padding:14px 18px; border-top:1px solid #EFEBDE; }
+        .row-actions form { display:inline; }
+        .row-actions button {
+            font-size:12px; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; margin-right:6px;
+        }
+        .approve-btn { background:#233420; color:#f4f1e8; }
+        .reject-btn { background:#fff; color:#b5482e; border:1px solid #e0c4bd !important; }
+        .badge-approved { font-size:11px; background:#E7EFD8; color:#3d6b34; padding:4px 10px; border-radius:999px; }
+        .empty-note { font-size:13px; color:#7a8371; padding:20px 0; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>플랫폼 관리자</div>
+        <a class="item on" th:href="@{/platform-admin/studios}">공방 관리</a>
+        <a class="item" th:href="@{/platform-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <h1>공방 관리</h1>
+
+        <div class="section-h">입점 승인 대기 (<span th:text="${#lists.size(pendingStudios)}">0</span>건)</div>
+        <p class="empty-note" th:if="${#lists.isEmpty(pendingStudios)}">승인 대기 중인 공방이 없습니다.</p>
+        <table th:if="${not #lists.isEmpty(pendingStudios)}">
+            <tr><th>공방명</th><th>운영자</th><th>소개</th><th>신청일</th><th>처리</th></tr>
+            <tr th:each="s : ${pendingStudios}">
+                <td th:text="${s.name}">공방명</td>
+                <td th:text="${s.owner.name} + ' (' + ${s.owner.username} + ')'">운영자</td>
+                <td th:text="${s.description}">소개</td>
+                <td th:text="${#temporals.format(s.createdAt, 'yyyy.MM.dd')}">신청일</td>
+                <td class="row-actions">
+                    <form th:action="@{'/platform-admin/studios/' + ${s.id} + '/approve'}" method="post">
+                        <button type="submit" class="approve-btn">승인</button>
+                    </form>
+                    <form th:action="@{'/platform-admin/studios/' + ${s.id} + '/reject'}" method="post">
+                        <button type="submit" class="reject-btn">거절</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+
+        <div class="section-h">입점 중인 공방 (<span th:text="${#lists.size(approvedStudios)}">0</span>곳)</div>
+        <p class="empty-note" th:if="${#lists.isEmpty(approvedStudios)}">입점 중인 공방이 없습니다.</p>
+        <table th:if="${not #lists.isEmpty(approvedStudios)}">
+            <tr><th>공방명</th><th>운영자</th><th>입점일</th><th>상태</th><th>관리</th></tr>
+            <tr th:each="s : ${approvedStudios}">
+                <td th:text="${s.name}">공방명</td>
+                <td th:text="${s.owner.name} + ' (' + ${s.owner.username} + ')'">운영자</td>
+                <td th:text="${#temporals.format(s.createdAt, 'yyyy.MM.dd')}">입점일</td>
+                <td><span class="badge-approved">입점 중</span></td>
+                <td class="row-actions">
+                    <form th:action="@{'/platform-admin/studios/' + ${s.id} + '/reject'}" method="post"
+                          onsubmit="return confirm('이 공방의 입점을 취소하시겠습니까? 취소하면 홈 화면 등에서 즉시 노출이 중단됩니다.');">
+                        <button type="submit" class="reject-btn">입점 취소</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>

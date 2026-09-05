@@ -41,7 +41,7 @@
     <div class="hill2"></div>
     <div class="copy">
         <div class="tag" sec:authorize="isAnonymous()">여러 터프팅 공방이 모인 곳</div>
-        <div class="tag" sec:authorize="isAuthenticated()">다시 오신 것을 환영해요</div>
+        <div class="tag" sec:authorize="isAuthenticated()">어서오세요</div>
 
         <h1 class="headline" sec:authorize="isAnonymous()">Green Healing Studio</h1>
         <h1 class="headline" sec:authorize="isAuthenticated()">
@@ -61,10 +61,6 @@
     <a th:href="@{/products}">
         <div class="icon-circle">🧶</div>
         완제품<br><small>Handmade Rug</small>
-    </a>
-    <a th:href="@{/products}">
-        <div class="icon-circle">🧵</div>
-        재료<br><small>Material</small>
     </a>
     <a th:href="@{/classes}">
         <div class="icon-circle">📅</div>

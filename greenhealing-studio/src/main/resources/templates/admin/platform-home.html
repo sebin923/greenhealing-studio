@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>플랫폼 관리자 - 그린힐링 스튜디오</title>
+    <title>플랫폼 관리자 - 그린 힐링 스튜디오</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .admin-shell { display:flex; }
@@ -20,8 +20,7 @@
 <div class="admin-shell">
     <div class="admin-side">
         <div class="logo">GREEN HEALING<br>플랫폼 관리자</div>
-        <div class="item">공방 입점 승인</div>
-        <div class="item">공방 관리</div>
+        <a class="item" th:href="@{/platform-admin/studios}" style="color:#cdd9e6; text-decoration:none;">공방 관리 (입점 승인)</a>
         <div class="item">전체 회원 관리</div>
         <div class="item">공지사항 관리</div>
         <div class="item">약관·개인정보처리방침</div>
@@ -31,11 +30,9 @@
         </div>
     </div>
     <div class="admin-main">
-        <h1 th:text="${loginUserName} + ' 님, 안녕하세요'">플랫폼 관리자님, 안녕하세요</h1>
+        <h1 th:text="${loginUserName} + ' 님, 안녕하세요'">관리자님, 어서오세요</h1>
         <p>플랫폼 관리자 전용 화면입니다. 아래 기능은 순차적으로 구현될 예정입니다.</p>
         <ul class="todo-list">
-            <li>공방 입점 신청 확인·승인·거절</li>
-            <li>입점 공방 목록 관리</li>
             <li>전체 회원 목록·검색·정지·삭제</li>
             <li>공지사항 작성·수정·삭제</li>
             <li>이용약관 / 개인정보처리방침 수정</li>

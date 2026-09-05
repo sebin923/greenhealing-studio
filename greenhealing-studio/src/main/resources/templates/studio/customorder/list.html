@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문제작 요청 관리 - 공방 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#233420; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { padding:14px 28px; font-size:13px; color:#cfd9c8; text-decoration:none; display:block; }
+        .admin-side .item.on { background:#3a5230; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:24px; }
+
+        .req-card { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:22px; margin-bottom:16px; }
+        .req-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .req-top .who { font-size:13px; font-weight:bold; }
+        .req-meta { font-size:12px; color:#7a8371; margin-bottom:10px; }
+        .req-note { font-size:13px; color:#4b5847; background:#F4F1E8; padding:12px 14px; border-radius:6px; margin-bottom:14px; }
+        .status { font-size:11px; padding:4px 12px; border-radius:999px; }
+        .status.PENDING { background:#F1DCC9; color:#8A4A24; }
+        .status.QUOTED { background:#EAE6F2; color:#5b4b8a; }
+        .status.IN_PROGRESS { background:#DCE7F0; color:#2c5f8a; }
+        .status.COMPLETED { background:#E7EFD8; color:#3d6b34; }
+        .status.REJECTED { background:#F1EDE3; color:#B8B2A0; }
+
+        .action-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .action-row input[type=number] {
+            width:120px; padding:8px 10px; border:1px solid #D8D2C0; border-radius:6px; font-size:12px;
+        }
+        .action-row button {
+            font-size:12px; padding:8px 14px; border-radius:6px; border:none; cursor:pointer;
+        }
+        .btn-primary { background:#233420; color:#f4f1e8; }
+        .btn-danger { background:#fff; color:#b5482e; border:1px solid #e0c4bd !important; }
+        .empty-note { text-align:center; padding:60px 0; color:#7a8371; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>공방 관리자</div>
+        <a class="item" th:href="@{/studio-admin/products}">상품 관리</a>
+        <a class="item" th:href="@{/studio-admin/classes}">클래스 관리</a>
+        <a class="item on" th:href="@{/studio-admin/custom-orders}">주문제작 관리</a>
+        <a class="item" th:href="@{/studio-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <h1>주문제작 요청 관리</h1>
+
+        <p class="empty-note" th:if="${#lists.isEmpty(requests)}">들어온 주문제작 요청이 없습니다.</p>
+
+        <div class="req-card" th:each="r : ${requests}">
+            <div class="req-top">
+                <span class="who" th:text="${r.user.name} + ' 님'">신청자</span>
+                <span class="status" th:classappend="${r.status.name()}" th:text="${r.status.name()}">상태</span>
+            </div>
+            <div class="req-meta"
+                 th:text="'사이즈: ' + ${r.size} + (${r.color} != null ? (' · 색상: ' + ${r.color}) : '') + ' · 신청일: ' + ${#temporals.format(r.createdAt, 'yyyy.MM.dd')}">
+                메타정보
+            </div>
+            <div class="req-note" th:if="${r.requestNote}" th:text="${r.requestNote}">요청사항</div>
+            <div th:if="${r.quotedPrice != null}" style="font-size:13px; font-weight:bold; margin-bottom:12px;"
+                 th:text="'현재 견적: ₩ ' + ${#numbers.formatInteger(r.quotedPrice, 0, 'COMMA')}">견적</div>
+
+            <!-- 상태별로 할 수 있는 행동이 다름 -->
+            <div class="action-row" th:if="${r.status.name() == 'PENDING'}">
+                <form th:action="@{'/studio-admin/custom-orders/' + ${r.id} + '/quote'}" method="post" class="action-row">
+                    <input type="number" name="price" placeholder="견적 금액(원)" required>
+                    <button type="submit" class="btn-primary">견적 보내기</button>
+                </form>
+                <form th:action="@{'/studio-admin/custom-orders/' + ${r.id} + '/reject'}" method="post">
+                    <button type="submit" class="btn-danger">제작 불가</button>
+                </form>
+            </div>
+
+            <div class="action-row" th:if="${r.status.name() == 'QUOTED'}">
+                <form th:action="@{'/studio-admin/custom-orders/' + ${r.id} + '/start'}" method="post">
+                    <button type="submit" class="btn-primary">제작 시작</button>
+                </form>
+                <form th:action="@{'/studio-admin/custom-orders/' + ${r.id} + '/reject'}" method="post">
+                    <button type="submit" class="btn-danger">제작 불가</button>
+                </form>
+            </div>
+
+            <div class="action-row" th:if="${r.status.name() == 'IN_PROGRESS'}">
+                <form th:action="@{'/studio-admin/custom-orders/' + ${r.id} + '/complete'}" method="post">
+                    <button type="submit" class="btn-primary">제작 완료 처리</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -83,6 +83,13 @@ public class OrderController {
         return "order/order-complete";
     }
 
+    /** 내 주문 내역 (마이페이지에서 연결됨) */
+    @GetMapping("/orders")
+    public String myOrders(Authentication authentication, Model model) {
+        model.addAttribute("orders", orderService.getMyOrders(currentUser(authentication)));
+        return "order/my-orders";
+    }
+
     private User currentUser(Authentication authentication) {
         return userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new IllegalStateException("로그인 정보를 찾을 수 없습니다."));

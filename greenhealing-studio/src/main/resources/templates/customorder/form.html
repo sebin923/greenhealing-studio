@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>주문제작 신청 - 그린힐링 스튜디오</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    .form-wrap { max-width: 600px; margin: 0 auto; padding: 50px 20px 80px; }
+    .form-wrap h1 { font-family:Georgia,serif; font-size:24px; margin-bottom:8px; }
+    .form-wrap .sub { font-size:13px; color:#7a8371; margin-bottom:28px; }
+    .field { margin-bottom:18px; }
+    .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:8px; }
+    .field input, .field select, .field textarea {
+      width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
+    }
+    .field textarea { resize:vertical; }
+    .submit-btn { width:100%; background:#233420; color:#f4f1e8; border:none; padding:15px 0;
+      border-radius:8px; font-size:14px; letter-spacing:1px; cursor:pointer; margin-top:10px; }
+    .error-box { color:#b5482e; font-size:12px; margin-bottom:16px; text-align:center; }
+  </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='custom-order')}"></nav>
+
+<div class="form-wrap">
+  <h1>주문제작 신청</h1>
+  <p class="sub">원하는 공방에 사이즈·색상·도안을 전달하고 견적을 받아보세요.</p>
+
+  <p class="error-box" th:if="${error}" th:text="${error}"></p>
+
+  <form th:action="@{/custom-order}" method="post">
+    <div class="field">
+      <label>신청할 공방</label>
+      <select name="studioId" required>
+        <option value="" disabled selected>공방을 선택해 주세요</option>
+        <option th:each="s : ${studios}" th:value="${s.id}" th:text="${s.name}"></option>
+      </select>
+    </div>
+    <div class="field">
+      <label>사이즈</label>
+      <input type="text" name="size" placeholder="예: 60x90cm" required>
+    </div>
+    <div class="field">
+      <label>색상 (선택)</label>
+      <input type="text" name="color" placeholder="예: 그린 톤">
+    </div>
+    <div class="field">
+      <label>도안 이미지 경로 (선택)</label>
+      <input type="text" name="designImageUrl" placeholder="원하는 도안 이미지가 있다면 경로를 입력해 주세요">
+    </div>
+    <div class="field">
+      <label>요청사항</label>
+      <textarea name="requestNote" rows="4" placeholder="원하는 디자인, 색감, 크기 등을 자유롭게 적어주세요"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">제작 문의 보내기</button>
+  </form>
+</div>
+
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 내역 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .order-wrap { padding: 36px 6% 80px; max-width: 800px; }
+        .order-card { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:20px; margin-bottom:16px; }
+        .order-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .order-top .no { font-size:12px; color:#8b9382; }
+        .status { font-size:11px; padding:4px 12px; border-radius:999px; }
+        .status.PAYMENT_PENDING { background:#F1DCC9; color:#8A4A24; }
+        .status.PAID { background:#E7EFD8; color:#3d6b34; }
+        .status.SHIPPING { background:#DCE7F0; color:#2c5f8a; }
+        .status.DELIVERED { background:#EAF0E3; color:#233420; }
+        .status.CANCELED { background:#F1EDE3; color:#B8B2A0; }
+        .item-line { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; color:#4b5847; }
+        .order-total { display:flex; justify-content:space-between; font-size:14px; font-weight:bold;
+            margin-top:10px; padding-top:10px; border-top:1px solid #EFEBDE; }
+        .order-meta { font-size:12px; color:#7a8371; margin-top:8px; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="order-wrap">
+    <h1 style="font-family:Georgia,serif; font-size:24px; margin-bottom:24px;">주문 내역</h1>
+
+    <div th:if="${#lists.isEmpty(orders)}" style="padding:60px 0; text-align:center; color:#7a8371;">
+        주문 내역이 없습니다. <a th:href="@{/products}" style="color:#233420;">상품 보러가기 →</a>
+    </div>
+
+    <div class="order-card" th:each="o : ${orders}">
+        <div class="order-top">
+            <span class="no" th:text="'주문번호 #' + ${o.id}">주문번호</span>
+            <span class="status" th:classappend="${o.status.name()}" th:text="${o.status.name()}">상태</span>
+        </div>
+
+        <div class="item-line" th:each="item : ${o.orderItems}">
+            <span th:text="${item.product.name} + ' × ' + ${item.quantity}">상품</span>
+            <span th:text="'₩ ' + ${#numbers.formatInteger(item.priceAtOrder * item.quantity, 0, 'COMMA')}">가격</span>
+        </div>
+
+        <div class="order-total">
+            <span>총 결제금액</span>
+            <span th:text="'₩ ' + ${#numbers.formatInteger(o.totalAmount, 0, 'COMMA')}">0원</span>
+        </div>
+
+        <div class="order-meta"
+             th:text="${#temporals.format(o.createdAt, 'yyyy.MM.dd')} + ' 주문 · 받는 사람: ' + ${o.receiverName} + ' · ' + ${o.shippingAddress}">
+            주문 정보
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

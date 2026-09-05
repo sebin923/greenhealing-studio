@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>클래스 등록/수정 - 공방 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-wrap { max-width: 560px; margin: 0 auto; padding: 50px 20px; }
+        .form-wrap h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:28px; }
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:8px; }
+        .field input { width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px; }
+        .time-row { display:flex; gap:12px; }
+        .time-row .field { flex:1; }
+        .submit-btn { width:100%; background:#233420; color:#f4f1e8; border:none; padding:15px 0;
+            border-radius:8px; font-size:14px; cursor:pointer; margin-top:10px; }
+        .cancel-link { display:block; text-align:center; margin-top:16px; font-size:13px; color:#7a8371; text-decoration:none; }
+        .error-box { color:#b5482e; font-size:12px; margin-bottom:16px; text-align:center; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="form-wrap">
+    <!-- classItem이 null이면 신규 등록, 값이 있으면 수정 모드 -->
+    <h1 th:text="${classItem != null} ? '클래스 수정' : '클래스 등록'">클래스 등록</h1>
+
+    <p class="error-box" th:if="${error}" th:text="${error}"></p>
+
+    <form th:action="@{${formAction}}" method="post">
+        <div class="field">
+            <label>클래스명</label>
+            <input type="text" name="title" th:value="${classItem?.title}" required>
+        </div>
+        <div class="field">
+            <label>날짜</label>
+            <input type="date" name="classDate" th:value="${classItem?.classDate}" required>
+        </div>
+        <div class="time-row">
+            <div class="field">
+                <label>시작 시간</label>
+                <input type="time" name="startTime" th:value="${classItem?.startTime}" required>
+            </div>
+            <div class="field">
+                <label>종료 시간</label>
+                <input type="time" name="endTime" th:value="${classItem?.endTime}" required>
+            </div>
+        </div>
+        <div class="field">
+            <label>정원 (명)</label>
+            <input type="number" name="capacity" th:value="${classItem?.capacity}" min="1" required>
+        </div>
+        <div class="field">
+            <label>가격 (원)</label>
+            <input type="number" name="price" th:value="${classItem?.price}" min="0" required>
+        </div>
+
+        <button type="submit" class="submit-btn" th:text="${submitLabel}">등록하기</button>
+    </form>
+    <a class="cancel-link" th:href="@{/studio-admin/classes}">← 취소하고 목록으로</a>
+</div>
+</body>
+</html>

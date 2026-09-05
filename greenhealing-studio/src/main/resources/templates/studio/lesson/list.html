@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>상품 관리 - 공방 관리자</title>
+    <title>클래스 관리 - 공방 관리자</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .admin-shell { display:flex; }
@@ -28,33 +28,33 @@
 <div class="admin-shell">
     <div class="admin-side">
         <div class="logo">GREEN HEALING<br>공방 관리자</div>
-        <a class="item on" th:href="@{/studio-admin/products}">상품 관리</a>
-        <a class="item" th:href="@{/studio-admin/classes}">클래스 관리</a>
+        <a class="item" th:href="@{/studio-admin/products}">상품 관리</a>
+        <a class="item on" th:href="@{/studio-admin/classes}">클래스 관리</a>
         <a class="item" th:href="@{/studio-admin/custom-orders}">주문제작 관리</a>
         <a class="item" th:href="@{/studio-admin}">← 관리자 홈</a>
         <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
     </div>
     <div class="admin-main">
         <div class="admin-top">
-            <h1 th:text="${studio.name} + ' 상품 관리'">상품 관리</h1>
-            <a class="new-btn" th:href="@{/studio-admin/products/new}">+ 상품 등록</a>
+            <h1 th:text="${studio.name} + ' 클래스 관리'">클래스 관리</h1>
+            <a class="new-btn" th:href="@{/studio-admin/classes/new}">+ 클래스 등록</a>
         </div>
 
-        <div th:if="${#lists.isEmpty(products)}" style="padding:60px 0; text-align:center; color:#7a8371;">
-            아직 등록한 상품이 없습니다.
+        <div th:if="${#lists.isEmpty(classes)}" style="padding:60px 0; text-align:center; color:#7a8371;">
+            아직 등록한 클래스가 없습니다.
         </div>
 
-        <table th:if="${not #lists.isEmpty(products)}">
-            <tr><th>상품명</th><th>카테고리</th><th>가격</th><th>재고</th><th>관리</th></tr>
-            <tr th:each="p : ${products}">
-                <td th:text="${p.name}">상품명</td>
-                <td th:text="${p.category}">카테고리</td>
-                <td th:text="'₩ ' + ${#numbers.formatInteger(p.price, 0, 'COMMA')}">가격</td>
-                <td th:text="${p.stock} + '개'">재고</td>
+        <table th:if="${not #lists.isEmpty(classes)}">
+            <tr><th>클래스명</th><th>일시</th><th>정원</th><th>가격</th><th>관리</th></tr>
+            <tr th:each="c : ${classes}">
+                <td th:text="${c.title}">클래스명</td>
+                <td th:text="${#temporals.format(c.classDate, 'yyyy.MM.dd')} + ' ' + ${c.startTime} + '~' + ${c.endTime}">일시</td>
+                <td th:text="${c.reservedCount} + ' / ' + ${c.capacity} + '명'">정원</td>
+                <td th:text="'₩ ' + ${#numbers.formatInteger(c.price, 0, 'COMMA')}">가격</td>
                 <td class="row-actions">
-                    <a th:href="@{'/studio-admin/products/' + ${p.id} + '/edit'}">수정</a>
-                    <form th:action="@{'/studio-admin/products/' + ${p.id} + '/delete'}" method="post" style="display:inline;"
-                          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                    <a th:href="@{'/studio-admin/classes/' + ${c.id} + '/edit'}">수정</a>
+                    <form th:action="@{'/studio-admin/classes/' + ${c.id} + '/delete'}" method="post" style="display:inline;"
+                          onsubmit="return confirm('정말 삭제하시겠습니까? 예약된 인원이 있으면 문제가 될 수 있습니다.');">
                         <button type="submit" class="danger">삭제</button>
                     </form>
                 </td>

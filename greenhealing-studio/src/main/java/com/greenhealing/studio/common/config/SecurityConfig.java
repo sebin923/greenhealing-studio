@@ -27,7 +27,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products", "/products/**",
-                                "/signup", "/login", "/classes", "/classes/**", "/custom-order", "/community", "/about",
+                                "/signup", "/login", "/classes", "/classes/**", "/community", "/about",
                                 "/notice", "/notice/**", "/faq", "/terms", "/privacy", "/studio-signup",
                                 "/password-reset", "/password-reset/**", "/api/auth/**").permitAll()
                         .requestMatchers("/studio-admin/**").hasRole("STUDIO_ADMIN")

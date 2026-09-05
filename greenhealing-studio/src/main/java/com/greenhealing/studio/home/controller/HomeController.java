@@ -49,12 +49,7 @@ public class HomeController {
     }
 
     // 클래스 예약은 LessonController에서 실제 구현됨 (이전의 준비중 라우트 제거)
-
-    @GetMapping("/custom-order")
-    public String customOrderComingSoon(Model model) {
-        model.addAttribute("title", "주문제작");
-        return "common/coming-soon";
-    }
+    // 주문제작은 CustomOrderController에서 실제 구현됨 (이전의 준비중 라우트 제거)
 
     @GetMapping("/community")
     public String communityComingSoon(Model model) {
