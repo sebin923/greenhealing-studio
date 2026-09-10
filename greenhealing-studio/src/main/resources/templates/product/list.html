@@ -83,11 +83,23 @@
                 <b th:text="${selectedCategory} ?: '전체'">전체</b> 상품
                 <b th:text="${totalCount}">0</b>개
             </div>
-            <form class="search-box" th:action="@{/products}" method="get">
-                <input type="hidden" name="category" th:value="${selectedCategory}">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="상품명 검색">
-                <button type="submit">검색</button>
-            </form>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <!-- 정렬 바꾸면 바로 그 정렬로 다시 조회됨 (검색어/카테고리는 그대로 유지) -->
+                <select onchange="location.href=this.value" style="padding:10px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;">
+                    <option value="#" th:value="@{/products(category=${selectedCategory}, keyword=${keyword}, sort='latest')}"
+                            th:selected="${sort == 'latest'}">최신순</option>
+                    <option th:value="@{/products(category=${selectedCategory}, keyword=${keyword}, sort='price-asc')}"
+                            th:selected="${sort == 'price-asc'}">가격 낮은순</option>
+                    <option th:value="@{/products(category=${selectedCategory}, keyword=${keyword}, sort='likes')}"
+                            th:selected="${sort == 'likes'}">찜 많은순</option>
+                </select>
+                <form class="search-box" th:action="@{/products}" method="get">
+                    <input type="hidden" name="category" th:value="${selectedCategory}">
+                    <input type="hidden" name="sort" th:value="${sort}">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="상품명 검색">
+                    <button type="submit">검색</button>
+                </form>
+            </div>
         </div>
 
         <div th:if="${#lists.isEmpty(products)}" style="padding: 60px 0; text-align:center; color:#7a8371;">
@@ -95,7 +107,15 @@
         </div>
 
         <div class="product-grid" style="padding:0;">
-            <div class="product-card" th:each="product : ${products}">
+            <div class="product-card" th:each="product : ${products}" style="position:relative;">
+                <!-- 찜 버튼: 카드 전체를 감싸는 링크 밖에 별도로 둬서, 찜 누를 때 상세페이지로 안 넘어가게 함 -->
+                <form sec:authorize="isAuthenticated()" th:action="@{'/products/' + ${product.id} + '/like'}" method="post"
+                      style="position:absolute; top:10px; right:10px; z-index:2;">
+                    <input type="hidden" name="redirectTo" value="/products">
+                    <button type="submit" th:text="${likedProductIds.contains(product.id)} ? '♥' : '♡'"
+                            th:style="${likedProductIds.contains(product.id)} ? 'color:#D9506B;' : 'color:#fff;'"
+                            style="background:rgba(35,52,32,0.35); border:none; border-radius:50%; width:30px; height:30px; font-size:15px; cursor:pointer;">♡</button>
+                </form>
                 <a th:href="@{'/products/' + ${product.id}}">
                     <div class="thumb">
                         <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" alt="">

@@ -3,6 +3,7 @@ package com.greenhealing.studio.home.controller;
 import com.greenhealing.studio.auth.domain.User;
 import com.greenhealing.studio.auth.repository.UserRepository;
 import com.greenhealing.studio.product.repository.ProductRepository;
+import com.greenhealing.studio.product.service.ProductLikeService;
 import com.greenhealing.studio.studio.domain.Studio;
 import com.greenhealing.studio.studio.repository.StudioRepository;
 import com.greenhealing.studio.studio.service.StudioFavoriteService;
@@ -22,6 +23,7 @@ import java.util.Set;
 public class HomeController {
 
     private final ProductRepository productRepository;
+    private final ProductLikeService productLikeService;
     private final StudioRepository studioRepository;
     private final StudioFavoriteService studioFavoriteService;
     private final UserRepository userRepository;
@@ -74,6 +76,7 @@ public class HomeController {
                 .orElseThrow(() -> new IllegalStateException("로그인 정보를 찾을 수 없습니다."));
 
         model.addAttribute("favoriteStudios", studioFavoriteService.getMyFavoriteStudios(user));
+        model.addAttribute("likedProducts", productLikeService.getMyLikedProducts(user));
         return "home/mypage";
     }
 

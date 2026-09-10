@@ -3,6 +3,7 @@ package com.greenhealing.studio.common.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,10 +27,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/products", "/products/**",
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**",
                                 "/signup", "/login", "/classes", "/classes/**", "/community", "/about",
                                 "/notice", "/notice/**", "/faq", "/terms", "/privacy", "/studio-signup",
                                 "/password-reset", "/password-reset/**", "/api/auth/**").permitAll()
+                        // 상품/공방 상세페이지는 GET(조회)만 공개. POST(찜/즐겨찾기 토글 등)는 로그인 필요하므로
+                        // 아래 anyRequest().authenticated()에 걸리도록 일부러 permitAll에서 빠뜨림
+                        .requestMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/studios/**").permitAll()
                         .requestMatchers("/studio-admin/**").hasRole("STUDIO_ADMIN")
                         .requestMatchers("/platform-admin/**").hasRole("SUPER_ADMIN")
                         .anyRequest().authenticated()

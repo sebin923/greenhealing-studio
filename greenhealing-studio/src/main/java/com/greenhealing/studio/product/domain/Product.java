@@ -41,6 +41,11 @@ public class Product extends BaseTimeEntity {
 
     private String imageUrl;
 
+    // 이 상품을 찜한 사람 수. 매번 세지 않고 숫자를 따로 저장해둬서
+    // "찜 많은 순" 정렬을 빠르게 할 수 있게 함 (찜 추가/삭제할 때마다 이 값도 같이 갱신됨)
+    @Column(nullable = false)
+    private int likeCount;
+
     @Builder
     public Product(Studio studio, String name, String category, int price, int stock, String description, String imageUrl) {
         this.studio = studio;
@@ -50,6 +55,7 @@ public class Product extends BaseTimeEntity {
         this.stock = stock;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.likeCount = 0;
     }
 
     public void decreaseStock(int quantity) {
@@ -76,5 +82,15 @@ public class Product extends BaseTimeEntity {
     /** 이 상품이 정말 이 공방(studio) 소유가 맞는지 확인할 때 씀 (다른 공방 상품을 몰래 수정 못 하게) */
     public boolean belongsTo(Studio studio) {
         return this.studio.getId().equals(studio.getId());
+    }
+
+    public void increaseLike() {
+        this.likeCount++;
+    }
+
+    public void decreaseLike() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 }

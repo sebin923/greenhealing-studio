@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${studio.name}">공방 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .studio-hero {
+            padding: 50px 6% 40px; background: linear-gradient(135deg, #EAF0E3, #F4F1E8);
+            display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;
+        }
+        .studio-hero .badge { font-size:11px; color:#7FAE72; border:1px solid #DCE7C8; border-radius:999px; padding:3px 12px; margin-bottom:12px; display:inline-block; }
+        .studio-hero h1 { font-family:Georgia,serif; font-size:30px; margin-bottom:12px; }
+        .studio-hero .desc { font-size:13px; color:#4b5847; max-width:600px; line-height:1.7; }
+        .fav-form button {
+            font-size:13px; padding:10px 20px; border-radius:999px; border:1px solid #D8D2C0;
+            background:#fff; color:#4b5847; cursor:pointer;
+        }
+        .fav-form button.active { background:#233420; color:#f4f1e8; border-color:#233420; }
+
+        .section { padding: 40px 6%; }
+        .section-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .section-h h2 { font-family:Georgia,serif; font-size:20px; }
+        .section-h a { font-size:12px; color:#7a8371; text-decoration:none; }
+        .empty-note { font-size:13px; color:#7a8371; padding:20px 0; }
+
+        .lesson-row { display:flex; justify-content:space-between; align-items:center; padding:14px 18px;
+            background:#fff; border:1px solid #E4E0D3; border-radius:8px; margin-bottom:10px; text-decoration:none; color:inherit; }
+        .lesson-row .title { font-size:14px; font-weight:bold; }
+        .lesson-row .meta { font-size:12px; color:#7a8371; margin-top:2px; }
+        .lesson-row .price { font-size:13px; font-weight:bold; color:#233420; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="studio-hero">
+    <div>
+        <span class="badge">입점 공방</span>
+        <h1 th:text="${studio.name}">공방명</h1>
+        <p class="desc" th:text="${studio.description}">공방 소개</p>
+    </div>
+    <!-- 로그인한 사람만 즐겨찾기 버튼 노출 -->
+    <form class="fav-form" sec:authorize="isAuthenticated()" th:action="@{'/studios/' + ${studio.id} + '/favorite'}" method="post">
+        <input type="hidden" name="redirectTo" th:value="'/studios/' + ${studio.id}">
+        <button type="submit" th:classappend="${isFavorite} ? 'active' : ''"
+                th:text="${isFavorite} ? '★ 즐겨찾기 됨' : '☆ 즐겨찾기'">즐겨찾기</button>
+    </form>
+</div>
+
+<div class="section">
+    <div class="section-h">
+        <h2>판매 상품</h2>
+        <a th:href="@{/products}">전체 상품 보기 →</a>
+    </div>
+    <p class="empty-note" th:if="${#lists.isEmpty(products)}">등록된 상품이 없습니다.</p>
+    <div class="product-grid" style="padding:0;" th:if="${not #lists.isEmpty(products)}">
+        <div class="product-card" th:each="product : ${products}">
+            <a th:href="@{'/products/' + ${product.id}}">
+                <div class="thumb">
+                    <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" alt="">
+                </div>
+                <div class="name" th:text="${product.name}">상품명</div>
+                <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(product.price, 0, 'COMMA')}">가격</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-h">
+        <h2>예정된 클래스</h2>
+        <a th:href="@{/classes}">전체 클래스 보기 →</a>
+    </div>
+    <p class="empty-note" th:if="${#lists.isEmpty(classes)}">예정된 클래스가 없습니다.</p>
+    <a class="lesson-row" th:each="c : ${classes}" th:href="@{'/classes/' + ${c.id}}">
+        <div>
+            <div class="title" th:text="${c.title}">클래스명</div>
+            <div class="meta" th:text="${#temporals.format(c.classDate, 'yyyy.MM.dd')} + ' ' + ${c.startTime} + '~' + ${c.endTime}">일시</div>
+        </div>
+        <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(c.price, 0, 'COMMA')}">가격</div>
+    </a>
+</div>
+
+<footer th:replace="~{common/fragments :: footer}"></footer>
+</body>
+</html>

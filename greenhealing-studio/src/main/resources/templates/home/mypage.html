@@ -67,6 +67,23 @@
             </form>
         </div>
     </div>
+
+    <div class="section-h" style="margin-top:40px;">찜한 상품</div>
+    <div th:if="${#lists.isEmpty(likedProducts)}" style="padding:40px 0; text-align:center; color:#7a8371;">
+        아직 찜한 상품이 없습니다. <a th:href="@{/products}" style="color:#233420;">상품 둘러보기 →</a>
+    </div>
+    <div class="fav-grid" th:if="${not #lists.isEmpty(likedProducts)}">
+        <div class="fav-card" th:each="p : ${likedProducts}">
+            <a th:href="@{'/products/' + ${p.id}}" style="text-decoration:none; color:inherit;">
+                <div class="name" th:text="${p.name}">상품명</div>
+                <div class="desc" th:text="'₩ ' + ${#numbers.formatInteger(p.price, 0, 'COMMA')}">가격</div>
+            </a>
+            <form th:action="@{'/products/' + ${p.id} + '/like'}" method="post">
+                <input type="hidden" name="redirectTo" value="/mypage">
+                <button type="submit">찜 해제</button>
+            </form>
+        </div>
+    </div>
 </div>
 <footer th:replace="~{common/fragments :: footer}"></footer>
 </body>

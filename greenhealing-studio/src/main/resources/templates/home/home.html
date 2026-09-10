@@ -41,7 +41,7 @@
     <div class="hill2"></div>
     <div class="copy">
         <div class="tag" sec:authorize="isAnonymous()">여러 터프팅 공방이 모인 곳</div>
-        <div class="tag" sec:authorize="isAuthenticated()">어서오세요</div>
+        <div class="tag" sec:authorize="isAuthenticated()">다시 오신 것을 환영해요</div>
 
         <h1 class="headline" sec:authorize="isAnonymous()">Green Healing Studio</h1>
         <h1 class="headline" sec:authorize="isAuthenticated()">
@@ -92,8 +92,10 @@
                         th:title="${favoriteStudioIds.contains(s.id)} ? '즐겨찾기 해제' : '즐겨찾기 추가'">☆</button>
             </form>
         </div>
-        <div class="name" th:text="${s.name}">공방명</div>
-        <div class="desc" th:text="${s.description}">공방 소개</div>
+        <a th:href="@{'/studios/' + ${s.id}}" style="text-decoration:none; color:inherit;">
+            <div class="name" th:text="${s.name}">공방명</div>
+            <div class="desc" th:text="${s.description}">공방 소개</div>
+        </a>
     </div>
 </div>
 <p class="empty-note" th:if="${#lists.isEmpty(studios)}">

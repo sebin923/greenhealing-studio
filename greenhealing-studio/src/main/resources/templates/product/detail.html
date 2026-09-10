@@ -46,11 +46,21 @@
         <div class="cat" th:text="${product.category}">카테고리</div>
         <!-- product.studio.name : 이 상품을 판매하는 공방 이름을 함께 보여줌
              (여러 공방이 입점하는 구조라서, 어느 공방 상품인지 표시하는 게 중요함) -->
-        <div style="font-size:12px; color:#7FAE72; margin-bottom:6px;" th:text="'공방: ' + ${product.studio.name}">공방명</div>
+        <a th:href="@{'/studios/' + ${product.studio.id}}"
+           style="font-size:12px; color:#7FAE72; margin-bottom:6px; display:block; text-decoration:none;"
+           th:text="'공방: ' + ${product.studio.name}">공방명</a>
         <h1 th:text="${product.name}">상품명</h1>
         <div class="price" th:text="'₩ ' + ${#numbers.formatInteger(product.price, 0, 'COMMA')}">0원</div>
-        <div class="stock" th:text="'재고 ' + ${product.stock} + '개'">재고</div>
+        <div class="stock" th:text="'재고 ' + ${product.stock} + '개 · 찜 ' + ${product.likeCount} + '개'">재고</div>
         <div class="desc" th:text="${product.description}">설명</div>
+
+        <!-- 찜 버튼: 로그인한 사람만, 상품과는 별개의 폼(장바구니 수량과 안 얽히게) -->
+        <form sec:authorize="isAuthenticated()" th:action="@{'/products/' + ${product.id} + '/like'}" method="post" style="margin-bottom:14px;">
+            <input type="hidden" name="redirectTo" th:value="'/products/' + ${product.id}">
+            <button type="submit"
+                    style="background:#fff; border:1.5px solid #D9506B; color:#D9506B; border-radius:8px; padding:10px 20px; font-size:13px; cursor:pointer;"
+                    th:text="${isLiked} ? '♥ 찜 해제' : '♡ 찜하기'">♡ 찜하기</button>
+        </form>
 
         <!-- 장바구니 담기 폼. 여기서 담으면(redirectTo=/cart) 바로 장바구니 화면으로 이동함
              (목록 페이지에서 담을 때는 redirectTo=/products 라서 그 자리에 그대로 머무름) -->
