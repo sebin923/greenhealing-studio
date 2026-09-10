@@ -3,11 +3,14 @@ spring:
     name: greenhealing-studio
 
   datasource:
-    # 로컬 MySQL 기준. 실제 비밀번호는 절대 커밋하지 말고
-    # 환경변수(DB_PASSWORD)나 별도 application-local.yml(.gitignore 처리)로 관리하세요.
-    url: jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: ${DB_PASSWORD:0923}
+    # 로컬 개발 중엔 기본값(localhost)을 쓰고,
+    # 배포 환경(AWS Elastic Beanstalk)에서는 환경변수(DB_URL/DB_USERNAME/DB_PASSWORD)로
+    # RDS 주소를 넣어주면 코드 수정 없이 그대로 배포됨.
+    # allowPublicKeyRetrieval=true 는 MySQL 8의 caching_sha2_password 인증 방식 때문에 필요함
+    # (DBeaver에서 RDS 연결할 때 겪었던 "Public Key Retrieval is not allowed" 에러와 동일한 이유)
+    url: ${DB_URL:jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:changeme}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -40,10 +43,13 @@ spring:
 app:
   mail:
     from: ${MAIL_USERNAME:your-email@gmail.com}
-  base-url: http://localhost:8080
+  # 이메일 인증/비번찾기 링크에 쓰이는 주소. 배포 후에는 EB 도메인 주소로 바꿔줘야 함
+  base-url: ${APP_BASE_URL:http://localhost:8080}
 
 server:
-  port: 8080
+  # AWS Elastic Beanstalk(Java 플랫폼)는 기본적으로 PORT 환경변수로 5000번을 넘겨줌.
+  # 로컬에서는 이 값이 없으니 기존처럼 8080번을 그대로 씀.
+  port: ${PORT:8080}
 
 logging:
   level:

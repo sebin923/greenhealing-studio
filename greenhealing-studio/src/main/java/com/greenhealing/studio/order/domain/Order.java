@@ -67,6 +67,22 @@ public class Order extends BaseTimeEntity {
         this.status = Status.PAID;
     }
 
+    /** 공방 관리자가 "배송중"으로 변경할 때 씀. 결제완료 상태에서만 가능 */
+    public void startShipping() {
+        if (this.status != Status.PAID) {
+            throw new IllegalStateException("결제 완료 상태의 주문만 배송을 시작할 수 있습니다.");
+        }
+        this.status = Status.SHIPPING;
+    }
+
+    /** 배송완료로 변경. 배송중 상태에서만 가능 */
+    public void markDelivered() {
+        if (this.status != Status.SHIPPING) {
+            throw new IllegalStateException("배송중 상태의 주문만 배송완료로 변경할 수 있습니다.");
+        }
+        this.status = Status.DELIVERED;
+    }
+
     public enum Status {
         PAYMENT_PENDING, PAID, SHIPPING, DELIVERED, CANCELED
     }

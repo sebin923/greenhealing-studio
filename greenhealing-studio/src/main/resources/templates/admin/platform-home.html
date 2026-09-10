@@ -2,13 +2,13 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>플랫폼 관리자 - 그린 힐링 스튜디오</title>
+    <title>플랫폼 관리자 - 그린힐링 스튜디오</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .admin-shell { display:flex; }
         .admin-side { width:220px; background:#1F4E79; color:#f4f1e8; min-height:100vh; padding:34px 0; }
         .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
-        .admin-side .item { padding:14px 28px; font-size:13px; color:#cdd9e6; }
+        .admin-side .item { display:block; padding:14px 28px; font-size:13px; color:#cdd9e6; }
         .admin-main { flex:1; padding:36px 40px; }
         .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:10px; }
         .admin-main p { font-size:13px; color:#7a8371; margin-bottom:30px; }
@@ -21,8 +21,8 @@
     <div class="admin-side">
         <div class="logo">GREEN HEALING<br>플랫폼 관리자</div>
         <a class="item" th:href="@{/platform-admin/studios}" style="color:#cdd9e6; text-decoration:none;">공방 관리 (입점 승인)</a>
-        <div class="item">전체 회원 관리</div>
-        <div class="item">공지사항 관리</div>
+        <a class="item" th:href="@{/platform-admin/members}" style="color:#cdd9e6; text-decoration:none;">전체 회원 관리</a>
+        <a class="item" th:href="@{/platform-admin/notices}" style="color:#cdd9e6; text-decoration:none;">공지사항 관리</a>
         <div class="item">약관·개인정보처리방침</div>
         <div class="item">방문자 통계</div>
         <div class="item" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">
@@ -30,11 +30,9 @@
         </div>
     </div>
     <div class="admin-main">
-        <h1 th:text="${loginUserName} + ' 님, 안녕하세요'">관리자님, 어서오세요</h1>
+        <h1 th:text="${loginUserName} + ' 님, 안녕하세요'">플랫폼 관리자님, 안녕하세요</h1>
         <p>플랫폼 관리자 전용 화면입니다. 아래 기능은 순차적으로 구현될 예정입니다.</p>
         <ul class="todo-list">
-            <li>전체 회원 목록·검색·정지·삭제</li>
-            <li>공지사항 작성·수정·삭제</li>
             <li>이용약관 / 개인정보처리방침 수정</li>
             <li>방문자 통계 (일/주/월별)</li>
         </ul>

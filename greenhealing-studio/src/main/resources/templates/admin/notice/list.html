@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 작성 - 플랫폼 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-wrap { max-width: 620px; margin: 0 auto; padding: 50px 20px; }
+        .form-wrap h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:28px; }
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:8px; }
+        .field input, .field textarea {
+            width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
+        }
+        .field textarea { resize:vertical; }
+        .submit-btn { width:100%; background:#1F4E79; color:#fff; border:none; padding:15px 0;
+            border-radius:8px; font-size:14px; cursor:pointer; margin-top:10px; }
+        .cancel-link { display:block; text-align:center; margin-top:16px; font-size:13px; color:#7a8371; text-decoration:none; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="form-wrap">
+    <h1 th:text="${notice != null} ? '공지사항 수정' : '공지사항 작성'">공지사항 작성</h1>
+
+    <form th:action="@{${formAction}}" method="post">
+        <div class="field">
+            <label>제목</label>
+            <input type="text" name="title" th:value="${notice?.title}" required>
+        </div>
+        <div class="field">
+            <label>내용</label>
+            <textarea name="content" rows="10" th:text="${notice?.content}" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn" th:text="${submitLabel}">등록하기</button>
+    </form>
+    <a class="cancel-link" th:href="@{/platform-admin/notices}">← 취소하고 목록으로</a>
+</div>
+</body>
+</html>

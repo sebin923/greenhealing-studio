@@ -36,6 +36,10 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    // 플랫폼 관리자가 계정을 정지시키면 false가 됨 (정지되면 로그인 자체가 막힘)
+    @Column(nullable = false)
+    private boolean enabled;
+
     @Builder
     public User(String name, String username, String email, String password, String phone, Role role) {
         this.name = name;
@@ -44,10 +48,21 @@ public class User extends BaseTimeEntity {
         this.password = password;
         this.phone = phone;
         this.role = role == null ? Role.CUSTOMER : role;
+        this.enabled = true;
     }
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    /** 플랫폼 관리자가 회원을 정지시킬 때 씀 */
+    public void suspend() {
+        this.enabled = false;
+    }
+
+    /** 정지 해제 */
+    public void activate() {
+        this.enabled = true;
     }
 
     public enum Role {

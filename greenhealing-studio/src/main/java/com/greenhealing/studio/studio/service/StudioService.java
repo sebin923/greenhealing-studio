@@ -58,4 +58,17 @@ public class StudioService {
 
         return owner.getId();
     }
+
+    /** 내 공방 정보 조회 (공방 관리자 전용) */
+    @Transactional(readOnly = true)
+    public Studio getMyStudio(User owner) {
+        return studioRepository.findByOwner(owner)
+                .orElseThrow(() -> new IllegalStateException("운영 중인 공방 정보를 찾을 수 없습니다."));
+    }
+
+    /** 내 공방 정보(이름/소개) 수정 */
+    @Transactional
+    public void updateMyStudio(User owner, String name, String description) {
+        getMyStudio(owner).updateInfo(name, description);
+    }
 }

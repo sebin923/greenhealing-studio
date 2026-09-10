@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공지사항 작성 - 플랫폼 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#1F4E79; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { display:block; padding:14px 28px; font-size:13px; color:#cdd9e6; text-decoration:none; }
+        .admin-side .item.on { background:#2c6294; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:28px; }
+
+        .form-box { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:28px; max-width:620px; }
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:8px; }
+        .field input, .field textarea {
+            width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
+        }
+        .field textarea { resize:vertical; }
+        .submit-btn { background:#1F4E79; color:#fff; border:none; padding:13px 26px;
+            border-radius:8px; font-size:13px; cursor:pointer; }
+        .cancel-link { display:inline-block; margin-left:12px; font-size:13px; color:#7a8371; text-decoration:none; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>플랫폼 관리자</div>
+        <a class="item" th:href="@{/platform-admin/studios}">공방 관리</a>
+        <a class="item" th:href="@{/platform-admin/members}">회원 관리</a>
+        <a class="item on" th:href="@{/platform-admin/notices}">공지사항 관리</a>
+        <a class="item" th:href="@{/platform-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <h1 th:text="${notice != null} ? '공지사항 수정' : '공지사항 작성'">공지사항 작성</h1>
+
+        <div class="form-box">
+            <form th:action="@{${formAction}}" method="post">
+                <div class="field">
+                    <label>제목</label>
+                    <input type="text" name="title" th:value="${notice?.title}" required>
+                </div>
+                <div class="field">
+                    <label>내용</label>
+                    <textarea name="content" rows="10" th:text="${notice?.content}" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" th:text="${submitLabel}">등록하기</button>
+                <a class="cancel-link" th:href="@{/platform-admin/notices}">취소하고 목록으로</a>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

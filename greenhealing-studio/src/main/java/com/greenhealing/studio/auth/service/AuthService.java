@@ -26,6 +26,9 @@ public class AuthService implements UserDetailsService {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
+                // enabled=false 인 계정(정지된 회원)은 Spring Security가 자동으로 로그인을 막아줌
+                // (비밀번호가 맞아도 "DisabledException"이 발생해서 로그인 실패 처리됨)
+                .disabled(!user.isEnabled())
                 .build();
     }
 }
