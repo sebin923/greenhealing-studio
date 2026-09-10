@@ -49,4 +49,10 @@ public class Studio extends BaseTimeEntity {
     public void reject() {
         this.approved = false;
     }
+
+    /** 공방 관리자가 자기 공방 정보(이름/소개)를 수정할 때 씀 */
+    public void updateInfo(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }

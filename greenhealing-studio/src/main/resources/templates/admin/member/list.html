@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 관리 - 플랫폼 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#1F4E79; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { display:block; padding:14px 28px; font-size:13px; color:#cdd9e6; text-decoration:none; }
+        .admin-side .item.on { background:#2c6294; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:24px; }
+
+        .search-box { display:flex; gap:8px; margin-bottom:20px; max-width:400px; }
+        .search-box input { flex:1; padding:10px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px; }
+        .search-box button { padding:10px 18px; background:#1F4E79; color:#fff; border:none; border-radius:6px; font-size:12px; cursor:pointer; }
+
+        table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #E4E0D3; border-radius:10px; overflow:hidden; }
+        th { text-align:left; font-size:11px; color:#8b9382; padding:14px 18px; background:#F4F1E8; }
+        td { font-size:13px; padding:14px 18px; border-top:1px solid #EFEBDE; }
+        .role-badge { font-size:11px; padding:3px 10px; border-radius:999px; }
+        .role-badge.CUSTOMER { background:#EAF0E3; color:#3d6b34; }
+        .role-badge.STUDIO_ADMIN { background:#F1DCC9; color:#8A4A24; }
+        .role-badge.SUPER_ADMIN { background:#DCE7F0; color:#2c5f8a; }
+        .status-badge { font-size:11px; padding:3px 10px; border-radius:999px; }
+        .status-badge.active { background:#E7EFD8; color:#3d6b34; }
+        .status-badge.suspended { background:#F1EDE3; color:#B8B2A0; }
+        .row-actions button {
+            font-size:12px; padding:6px 12px; border-radius:6px; border:1px solid #D8D2C0;
+            background:#fff; color:#4b5847; cursor:pointer; margin-right:6px;
+        }
+        .row-actions button.danger { color:#b5482e; border-color:#e0c4bd; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>플랫폼 관리자</div>
+        <a class="item" th:href="@{/platform-admin/studios}">공방 관리</a>
+        <a class="item on" th:href="@{/platform-admin/members}">회원 관리</a>
+        <a class="item" th:href="@{/platform-admin/notices}">공지사항 관리</a>
+        <a class="item" th:href="@{/platform-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <h1>회원 관리</h1>
+
+        <form class="search-box" th:action="@{/platform-admin/members}" method="get">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="이름/아이디/이메일 검색">
+            <button type="submit">검색</button>
+        </form>
+
+        <table>
+            <tr><th>이름</th><th>아이디</th><th>이메일</th><th>권한</th><th>상태</th><th>가입일</th><th>관리</th></tr>
+            <tr th:each="m : ${members}">
+                <td th:text="${m.name}">이름</td>
+                <td th:text="${m.username}">아이디</td>
+                <td th:text="${m.email}">이메일</td>
+                <td><span class="role-badge" th:classappend="${m.role.name()}" th:text="${m.role.name()}">권한</span></td>
+                <td>
+                    <span class="status-badge" th:classappend="${m.enabled} ? 'active' : 'suspended'"
+                          th:text="${m.enabled} ? '정상' : '정지됨'">상태</span>
+                </td>
+                <td th:text="${#temporals.format(m.createdAt, 'yyyy.MM.dd')}">가입일</td>
+                <td class="row-actions">
+                    <!-- SUPER_ADMIN 계정은 정지/삭제 버튼 자체를 안 보여줌 (서비스단에서도 막혀있지만, 화면에서도 아예 못 누르게) -->
+                    <th:block th:if="${m.role.name() != 'SUPER_ADMIN'}">
+                        <form th:if="${m.enabled}" th:action="@{'/platform-admin/members/' + ${m.id} + '/suspend'}" method="post" style="display:inline;">
+                            <button type="submit">정지</button>
+                        </form>
+                        <form th:unless="${m.enabled}" th:action="@{'/platform-admin/members/' + ${m.id} + '/activate'}" method="post" style="display:inline;">
+                            <button type="submit">정지 해제</button>
+                        </form>
+                        <form th:action="@{'/platform-admin/members/' + ${m.id} + '/delete'}" method="post" style="display:inline;"
+                              onsubmit="return confirm('정말 이 회원을 삭제하시겠습니까?');">
+                            <button type="submit" class="danger">삭제</button>
+                        </form>
+                    </th:block>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>

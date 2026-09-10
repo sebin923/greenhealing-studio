@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 관리 - 공방 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#233420; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { padding:14px 28px; font-size:13px; color:#cfd9c8; text-decoration:none; display:block; }
+        .admin-side .item.on { background:#3a5230; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:24px; }
+
+        .order-card { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:20px; margin-bottom:16px; }
+        .order-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .order-top .no { font-size:12px; color:#8b9382; }
+        .status { font-size:11px; padding:4px 12px; border-radius:999px; }
+        .status.PAYMENT_PENDING { background:#F1DCC9; color:#8A4A24; }
+        .status.PAID { background:#EAE6F2; color:#5b4b8a; }
+        .status.SHIPPING { background:#DCE7F0; color:#2c5f8a; }
+        .status.DELIVERED { background:#E7EFD8; color:#3d6b34; }
+        .status.CANCELED { background:#F1EDE3; color:#B8B2A0; }
+        .item-line { font-size:13px; color:#4b5847; padding:4px 0; }
+        .order-meta { font-size:12px; color:#7a8371; margin-top:10px; }
+        .action-row { margin-top:14px; }
+        .action-row button {
+            font-size:12px; padding:8px 16px; border-radius:6px; border:none; cursor:pointer; background:#233420; color:#f4f1e8;
+        }
+        .empty-note { text-align:center; padding:60px 0; color:#7a8371; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>공방 관리자</div>
+        <a class="item" th:href="@{/studio-admin/info}">공방 정보</a>
+        <a class="item" th:href="@{/studio-admin/products}">상품 관리</a>
+        <a class="item" th:href="@{/studio-admin/classes}">클래스 관리</a>
+        <a class="item on" th:href="@{/studio-admin/orders}">주문 관리</a>
+        <a class="item" th:href="@{/studio-admin/custom-orders}">주문제작 관리</a>
+        <a class="item" th:href="@{/studio-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <h1>주문 관리</h1>
+
+        <p class="empty-note" th:if="${#lists.isEmpty(orders)}">들어온 주문이 없습니다.</p>
+
+        <div class="order-card" th:each="o : ${orders}">
+            <div class="order-top">
+                <span class="no" th:text="'주문번호 #' + ${o.id} + ' · ' + ${o.user.name} + ' 님'">주문번호</span>
+                <span class="status" th:classappend="${o.status.name()}" th:text="${o.status.name()}">상태</span>
+            </div>
+
+            <!-- 참고: 이 주문 안에는 다른 공방 상품도 섞여있을 수 있음(장바구니에 여러 공방 상품을 같이 담을 수 있어서).
+                 지금은 전체 상품을 그대로 보여줌 (배송지/받는사람 정보는 주문 전체 공통이라 공방별로 나뉘지 않음) -->
+            <div th:each="item : ${o.orderItems}" class="item-line"
+                 th:text="${item.product.name} + ' × ' + ${item.quantity} + '  (₩ ' + ${#numbers.formatInteger(item.priceAtOrder * item.quantity, 0, 'COMMA')} + ')'">
+                상품
+            </div>
+
+            <div class="order-meta"
+                 th:text="'받는 사람: ' + ${o.receiverName} + ' (' + ${o.receiverPhone} + ') · ' + ${o.shippingAddress}">
+                배송정보
+            </div>
+            <div class="order-meta" th:text="${#temporals.format(o.createdAt, 'yyyy.MM.dd')} + ' 주문'">주문일</div>
+
+            <div class="action-row" th:if="${o.status.name() == 'PAID'}">
+                <form th:action="@{'/studio-admin/orders/' + ${o.id} + '/ship'}" method="post">
+                    <button type="submit">배송 시작</button>
+                </form>
+            </div>
+            <div class="action-row" th:if="${o.status.name() == 'SHIPPING'}">
+                <form th:action="@{'/studio-admin/orders/' + ${o.id} + '/deliver'}" method="post">
+                    <button type="submit">배송 완료 처리</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

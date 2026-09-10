@@ -34,4 +34,10 @@ public class Notice extends BaseTimeEntity {
         this.title = title;
         this.content = content;
     }
+
+    /** 플랫폼 관리자가 공지사항을 수정할 때 씀 */
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

@@ -8,7 +8,7 @@
         .admin-shell { display:flex; }
         .admin-side { width:220px; background:#233420; color:#f4f1e8; min-height:100vh; padding:34px 0; }
         .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
-        .admin-side .item { padding:14px 28px; font-size:13px; color:#cfd9c8; }
+        .admin-side .item { display:block; padding:14px 28px; font-size:13px; color:#cfd9c8; }
         .admin-main { flex:1; padding:36px 40px; }
         .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:10px; }
         .admin-main p { font-size:13px; color:#7a8371; margin-bottom:30px; }
@@ -20,10 +20,10 @@
 <div class="admin-shell">
     <div class="admin-side">
         <div class="logo">GREEN HEALING<br>공방 관리자</div>
-        <div class="item">공방 정보</div>
+        <a class="item" th:href="@{/studio-admin/info}" style="color:#cfd9c8; text-decoration:none;">공방 정보</a>
         <a class="item" th:href="@{/studio-admin/products}" style="color:#cfd9c8; text-decoration:none;">상품 관리</a>
         <a class="item" th:href="@{/studio-admin/classes}" style="color:#cfd9c8; text-decoration:none;">클래스 관리</a>
-        <div class="item">주문 관리</div>
+        <a class="item" th:href="@{/studio-admin/orders}" style="color:#cfd9c8; text-decoration:none;">주문 관리</a>
         <a class="item" th:href="@{/studio-admin/custom-orders}" style="color:#cfd9c8; text-decoration:none;">주문제작 관리</a>
         <div class="item">매출 현황</div>
         <div class="item" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">
@@ -31,12 +31,10 @@
         </div>
     </div>
     <div class="admin-main">
-        <h1 th:text="${loginUserName} + ' 님, 안녕하세요'">공방 관리자님, 안녕하세요</h1>
+        <h1 th:text="${studio.name} + ' · ' + ${loginUserName} + ' 님, 안녕하세요'">공방 관리자님, 안녕하세요</h1>
         <p>공방 관리자 전용 화면입니다. 아래 기능은 순차적으로 구현될 예정입니다.</p>
         <ul class="todo-list">
-            <li>공방 정보 수정 (소개·주소·연락처·운영시간)</li>
             <li>클래스 예약자 확인</li>
-            <li>주문 확인 및 배송 상태 변경</li>
             <li>매출 현황 (일별/월별)</li>
         </ul>
     </div>

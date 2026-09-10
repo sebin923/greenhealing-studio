@@ -31,6 +31,8 @@
     <div class="admin-side">
         <div class="logo">GREEN HEALING<br>플랫폼 관리자</div>
         <a class="item on" th:href="@{/platform-admin/studios}">공방 관리</a>
+        <a class="item" th:href="@{/platform-admin/members}">회원 관리</a>
+        <a class="item" th:href="@{/platform-admin/notices}">공지사항 관리</a>
         <a class="item" th:href="@{/platform-admin}">← 관리자 홈</a>
         <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
     </div>
@@ -38,7 +40,7 @@
         <h1>공방 관리</h1>
 
         <div class="section-h">입점 승인 대기 (<span th:text="${#lists.size(pendingStudios)}">0</span>건)</div>
-        <p class="empty-note" th:if="${#lists.isEmpty(pendingStudios)}">승인 대기 중인 공방이 없습니다.</p>
+        <p class="empty-note" th:if="${#lists.isEmpty(pendingStudios)}">승인 대기중인 공방이 없습니다.</p>
         <table th:if="${not #lists.isEmpty(pendingStudios)}">
             <tr><th>공방명</th><th>운영자</th><th>소개</th><th>신청일</th><th>처리</th></tr>
             <tr th:each="s : ${pendingStudios}">
@@ -57,15 +59,15 @@
             </tr>
         </table>
 
-        <div class="section-h">입점 중인 공방 (<span th:text="${#lists.size(approvedStudios)}">0</span>곳)</div>
-        <p class="empty-note" th:if="${#lists.isEmpty(approvedStudios)}">입점 중인 공방이 없습니다.</p>
+        <div class="section-h">입점중인 공방 (<span th:text="${#lists.size(approvedStudios)}">0</span>곳)</div>
+        <p class="empty-note" th:if="${#lists.isEmpty(approvedStudios)}">입점중인 공방이 없습니다.</p>
         <table th:if="${not #lists.isEmpty(approvedStudios)}">
             <tr><th>공방명</th><th>운영자</th><th>입점일</th><th>상태</th><th>관리</th></tr>
             <tr th:each="s : ${approvedStudios}">
                 <td th:text="${s.name}">공방명</td>
                 <td th:text="${s.owner.name} + ' (' + ${s.owner.username} + ')'">운영자</td>
                 <td th:text="${#temporals.format(s.createdAt, 'yyyy.MM.dd')}">입점일</td>
-                <td><span class="badge-approved">입점 중</span></td>
+                <td><span class="badge-approved">입점중</span></td>
                 <td class="row-actions">
                     <form th:action="@{'/platform-admin/studios/' + ${s.id} + '/reject'}" method="post"
                           onsubmit="return confirm('이 공방의 입점을 취소하시겠습니까? 취소하면 홈 화면 등에서 즉시 노출이 중단됩니다.');">

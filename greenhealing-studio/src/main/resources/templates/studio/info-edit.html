@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>공방 정보 - 공방 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .admin-shell { display:flex; }
+        .admin-side { width:220px; background:#233420; color:#f4f1e8; min-height:100vh; padding:34px 0; }
+        .admin-side .logo { font-family:Georgia,serif; font-size:16px; padding:0 28px 30px; }
+        .admin-side .item { padding:14px 28px; font-size:13px; color:#cfd9c8; text-decoration:none; display:block; }
+        .admin-side .item.on { background:#3a5230; color:#fff; font-weight:bold; }
+        .admin-main { flex:1; padding:36px 40px; }
+        .admin-main h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:24px; }
+
+        .form-box { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:28px; max-width:520px; }
+        .field { margin-bottom:18px; }
+        .field label { display:block; font-size:12px; color:#5b6656; margin-bottom:8px; }
+        .field input, .field textarea {
+            width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
+        }
+        .field textarea { resize:vertical; }
+        .submit-btn { background:#233420; color:#f4f1e8; border:none; padding:13px 26px;
+            border-radius:8px; font-size:13px; cursor:pointer; }
+        .success-box { background:#E7EFD8; color:#3d6b34; font-size:13px; padding:12px 16px; border-radius:6px; margin-bottom:20px; max-width:520px; }
+        .approve-badge { display:inline-block; font-size:11px; padding:4px 12px; border-radius:999px; margin-bottom:20px; }
+        .approve-badge.on { background:#E7EFD8; color:#3d6b34; }
+        .approve-badge.off { background:#F1DCC9; color:#8A4A24; }
+    </style>
+</head>
+<body style="padding:0;">
+<div class="admin-shell">
+    <div class="admin-side">
+        <div class="logo">GREEN HEALING<br>공방 관리자</div>
+        <a class="item on" th:href="@{/studio-admin/info}">공방 정보</a>
+        <a class="item" th:href="@{/studio-admin/products}">상품 관리</a>
+        <a class="item" th:href="@{/studio-admin/classes}">클래스 관리</a>
+        <a class="item" th:href="@{/studio-admin/orders}">주문 관리</a>
+        <a class="item" th:href="@{/studio-admin/custom-orders}">주문제작 관리</a>
+        <a class="item" th:href="@{/studio-admin}">← 관리자 홈</a>
+        <a class="item" th:href="@{/logout}" style="margin-top:20px; border-top:1px solid rgba(244,241,232,.15); padding-top:20px;">로그아웃</a>
+    </div>
+    <div class="admin-main">
+        <h1>공방 정보</h1>
+
+        <p class="success-box" th:if="${param.updated}">공방 정보가 수정되었습니다.</p>
+
+        <!-- 승인 상태는 여기서 못 바꿈 (플랫폼 관리자만 승인/거절 가능) - 참고용으로만 보여줌 -->
+        <span class="approve-badge" th:classappend="${studio.approved} ? 'on' : 'off'"
+              th:text="${studio.approved} ? '입점 승인됨' : '승인 대기중'">상태</span>
+
+        <div class="form-box">
+            <form th:action="@{/studio-admin/info}" method="post">
+                <div class="field">
+                    <label>공방명</label>
+                    <input type="text" name="name" th:value="${studio.name}" required>
+                </div>
+                <div class="field">
+                    <label>공방 소개</label>
+                    <textarea name="description" rows="5" th:text="${studio.description}"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">저장하기</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
