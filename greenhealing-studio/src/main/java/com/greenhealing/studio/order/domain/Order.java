@@ -41,8 +41,8 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private Status status;
 
-    // 테스트 결제 여부/키 (실결제 PG 연동 전 단계)
-    private String testPaymentKey;
+    // 토스페이먼츠가 결제 승인 후 돌려주는 고유 결제번호 (paymentKey)
+    private String paymentKey;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -62,8 +62,9 @@ public class Order extends BaseTimeEntity {
         item.assignOrder(this);
     }
 
-    public void completeTestPayment(String testPaymentKey) {
-        this.testPaymentKey = testPaymentKey;
+    /** 토스페이먼츠 결제 승인이 완료됐을 때 호출. paymentKey를 저장하고 결제완료 상태로 바꿈 */
+    public void completePayment(String paymentKey) {
+        this.paymentKey = paymentKey;
         this.status = Status.PAID;
     }
 

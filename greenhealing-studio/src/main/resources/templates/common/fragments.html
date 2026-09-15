@@ -33,6 +33,8 @@
                 <span class="profile-avatar" th:text="${loginUserInitial}">?</span>
                 <span th:text="${loginUserName} + '님'">회원님</span>
             </a>
+            <!-- 로그아웃: Spring Security 기본 로그아웃 주소(/logout)로 보내면 자동 처리됨 -->
+            <a th:href="@{/logout}" class="logout-link">로그아웃</a>
         </span>
         <!-- 비로그인 상태: 회원가입 / 로그인 -->
         <span sec:authorize="isAnonymous()">

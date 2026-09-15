@@ -42,6 +42,10 @@
             <a class="new-btn" th:href="@{/studio-admin/products/new}">+ 상품 등록</a>
         </div>
 
+        <!-- 삭제 시도했는데 실패했을 때(예: 이미 주문된 상품) 여기에 이유를 보여줌 -->
+        <p th:if="${param.error}" th:text="${param.error}"
+           style="background:#F1DCC9; color:#8A4A24; font-size:13px; padding:12px 16px; border-radius:6px; margin-bottom:20px;"></p>
+
         <div th:if="${#lists.isEmpty(products)}" style="padding:60px 0; text-align:center; color:#7a8371;">
             아직 등록한 상품이 없습니다.
         </div>

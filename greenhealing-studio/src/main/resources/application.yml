@@ -1,56 +1,62 @@
 spring:
-  application:
-    name: greenhealing-studio
+    application:
+        name: greenhealing-studio
 
-  datasource:
-    # 로컬 개발 중엔 기본값(localhost)을 쓰고,
-    # 배포 환경(AWS Elastic Beanstalk)에서는 환경변수(DB_URL/DB_USERNAME/DB_PASSWORD)로
-    # RDS 주소를 넣어주면 코드 수정 없이 그대로 배포됨.
-    # allowPublicKeyRetrieval=true 는 MySQL 8의 caching_sha2_password 인증 방식 때문에 필요함
-    # (DBeaver에서 RDS 연결할 때 겪었던 "Public Key Retrieval is not allowed" 에러와 동일한 이유)
-    url: ${DB_URL:jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:changeme}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    datasource:
+        # 로컬 개발 중엔 기본값(localhost)을 쓰고,
+        # 배포 환경(AWS Elastic Beanstalk)에서는 환경변수(DB_URL/DB_USERNAME/DB_PASSWORD)로
+        # RDS 주소를 넣어주면 코드 수정 없이 그대로 배포됨.
+        # allowPublicKeyRetrieval=true 는 MySQL 8의 caching_sha2_password 인증 방식 때문에 필요함
+        # (DBeaver에서 RDS 연결할 때 겪었던 "Public Key Retrieval is not allowed" 에러와 동일한 이유)
+        url: ${DB_URL:jdbc:mysql://localhost:3306/greenhealing_studio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+        username: ${DB_USERNAME:root}
+        password: ${DB_PASSWORD:changeme}
+        driver-class-name: com.mysql.cj.jdbc.Driver
 
-  jpa:
-    hibernate:
-      # 개발 초기에는 update로 시작하고, 스키마가 안정되면 validate로 전환 권장
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
+    jpa:
+        hibernate:
+            # 개발 초기에는 update로 시작하고, 스키마가 안정되면 validate로 전환 권장
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: true
+                dialect: org.hibernate.dialect.MySQLDialect
 
-  thymeleaf:
-    cache: false
+    thymeleaf:
+        cache: false
 
-  mail:
-    # Gmail 기준 예시. 구글 계정 > 보안 > 2단계 인증 활성화 후
-    # '앱 비밀번호'를 발급받아 MAIL_PASSWORD로 사용하세요. (일반 로그인 비밀번호 아님)
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:changeme}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+    mail:
+        # Gmail 기준 예시. 구글 계정 > 보안 > 2단계 인증 활성화 후
+        # '앱 비밀번호'를 발급받아 MAIL_PASSWORD로 사용하세요. (일반 로그인 비밀번호 아님)
+        host: smtp.gmail.com
+        port: 587
+        username: ${MAIL_USERNAME:your-email@gmail.com}
+        password: ${MAIL_PASSWORD:changeme}
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                    starttls:
+                        enable: true
 
 app:
-  mail:
-    from: ${MAIL_USERNAME:your-email@gmail.com}
-  # 이메일 인증/비번찾기 링크에 쓰이는 주소. 배포 후에는 EB 도메인 주소로 바꿔줘야 함
-  base-url: ${APP_BASE_URL:http://localhost:8080}
+    mail:
+        from: ${MAIL_USERNAME:your-email@gmail.com}
+    # 이메일 인증/비번찾기 링크에 쓰이는 주소. 배포 후에는 EB 도메인 주소로 바꿔줘야 함
+    base-url: ${APP_BASE_URL:http://localhost:8080}
+
+# 토스페이먼츠 결제 연동. 클라이언트키는 화면(자바스크립트)에 노출되도 괜찮지만,
+# 시크릿키는 절대 화면에 노출되면 안 되고 서버(TossPaymentService)에서만 씀.
+toss:
+    client-key: ${TOSS_CLIENT_KEY:test_ck_placeholder}
+    secret-key: ${TOSS_SECRET_KEY:test_sk_placeholder}
 
 server:
-  # AWS Elastic Beanstalk(Java 플랫폼)는 기본적으로 PORT 환경변수로 5000번을 넘겨줌.
-  # 로컬에서는 이 값이 없으니 기존처럼 8080번을 그대로 씀.
-  port: ${PORT:8080}
+    # AWS Elastic Beanstalk(Java 플랫폼)는 기본적으로 PORT 환경변수로 5000번을 넘겨줌.
+    # 로컬에서는 이 값이 없으니 기존처럼 8080번을 그대로 씀.
+    port: ${PORT:8080}
 
 logging:
-  level:
-    org.hibernate.SQL: debug
+    level:
+        org.hibernate.SQL: debug

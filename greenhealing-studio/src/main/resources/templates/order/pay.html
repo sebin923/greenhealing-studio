@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제하기 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .pay-wrap { max-width: 480px; margin: 80px auto; padding: 0 20px; text-align: center; }
+        .pay-wrap h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:20px; }
+        .amount-box { background:#fff; border:1px solid #E4E0D3; border-radius:10px; padding:28px; margin-bottom:24px; }
+        .amount-box .label { font-size:12px; color:#7a8371; margin-bottom:8px; }
+        .amount-box .amount { font-size:28px; font-weight:bold; color:#233420; }
+        .pay-btn { width:100%; background:#233420; color:#f4f1e8; border:none; padding:16px 0;
+            border-radius:8px; font-size:15px; letter-spacing:1px; cursor:pointer; }
+        .pay-btn:disabled { background:#B8B2A0; cursor:not-allowed; }
+        .cancel-link { display:block; margin-top:16px; font-size:13px; color:#7a8371; text-decoration:none; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="pay-wrap">
+    <h1>결제하기</h1>
+    <div class="amount-box">
+        <div class="label">결제 금액</div>
+        <div class="amount" th:text="'₩ ' + ${#numbers.formatInteger(order.totalAmount, 0, 'COMMA')}">0원</div>
+    </div>
+
+    <button id="payButton" class="pay-btn">토스페이먼츠로 결제하기</button>
+    <a class="cancel-link" th:href="@{/cart}">취소하고 장바구니로 돌아가기</a>
+</div>
+
+<!-- 토스페이먼츠 결제창 SDK -->
+<script src="https://js.tosspayments.com/v1"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const clientKey = /*[[${tossClientKey}]]*/ 'test_ck_placeholder';
+    const tossOrderId = /*[[${tossOrderId}]]*/ 'order-0';
+    const amount = /*[[${order.totalAmount}]]*/ 0;
+    const orderName = /*[[${order.orderItems[0].product.name} + (${#lists.size(order.orderItems)} > 1 ? ' 외 ' + (${#lists.size(order.orderItems)} - 1) + '건' : '')]]*/ '주문상품';
+    const customerName = /*[[${order.receiverName}]]*/ '고객';
+    const successUrl = /*[[${successUrl}]]*/ 'http://localhost:8080/';
+    const failUrl = /*[[${failUrl}]]*/ 'http://localhost:8080/';
+    /*]]>*/
+
+    const tossPayments = TossPayments(clientKey);
+
+    document.getElementById('payButton').addEventListener('click', function () {
+        this.disabled = true;
+        this.textContent = '결제창 여는 중...';
+
+        // 카드 결제 요청. 성공하면 토스가 successUrl로, 실패/취소하면 failUrl로 사용자를 보내줌
+        tossPayments.requestPayment('카드', {
+            amount: amount,
+            orderId: tossOrderId,
+            orderName: orderName,
+            customerName: customerName,
+            successUrl: successUrl,
+            failUrl: failUrl,
+        }).catch(function (error) {
+            document.getElementById('payButton').disabled = false;
+            document.getElementById('payButton').textContent = '토스페이먼츠로 결제하기';
+            if (error.code === 'USER_CANCEL') {
+                // 사용자가 결제창을 그냥 닫은 경우 - 에러 아님, 조용히 무시
+                return;
+            }
+            alert('결제 요청 중 문제가 발생했습니다: ' + error.message);
+        });
+    });
+</script>
+</body>
+</html>

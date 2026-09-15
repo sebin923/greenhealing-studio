@@ -1,7 +1,10 @@
 package com.greenhealing.studio.product.service;
 
 import com.greenhealing.studio.auth.domain.User;
+import com.greenhealing.studio.cart.repository.CartItemRepository;
+import com.greenhealing.studio.order.repository.OrderItemRepository;
 import com.greenhealing.studio.product.domain.Product;
+import com.greenhealing.studio.product.repository.ProductLikeRepository;
 import com.greenhealing.studio.product.repository.ProductRepository;
 import com.greenhealing.studio.studio.domain.Studio;
 import com.greenhealing.studio.studio.repository.StudioRepository;
@@ -22,6 +25,9 @@ public class ProductAdminService {
 
     private final ProductRepository productRepository;
     private final StudioRepository studioRepository;
+    private final CartItemRepository cartItemRepository;
+    private final ProductLikeRepository productLikeRepository;
+    private final OrderItemRepository orderItemRepository;
 
     /** 로그인한 공방 관리자가 운영하는 공방을 찾아줌 (없으면 오류 - 정상적으로는 항상 있어야 함) */
     @Transactional(readOnly = true)
@@ -66,9 +72,26 @@ public class ProductAdminService {
         product.update(name, category, price, stock, description, imageUrl);
     }
 
+    /**
+     * 상품 삭제.
+     * 원래는 이 상품이 장바구니(cart_items)나 찜(product_likes)에 걸려있으면
+     * DB가 "다른 데서 참조하고 있어서 못 지운다"고 막아버리는 에러가 났었음.
+     *
+     * 그래서:
+     * 1) 이미 "주문"된 적 있는 상품이면 - 주문 기록이 깨지면 안 되니까 아예 삭제를 막고 안내 메시지를 줌
+     * 2) 장바구니/찜은 "지금 담겨있다"는 임시 상태일 뿐이라, 상품 지우기 전에 먼저 같이 정리해줌
+     */
     @Transactional
     public void deleteProduct(User owner, Long productId) {
         Product product = getMyProduct(owner, productId);
+
+        if (orderItemRepository.existsByProduct(product)) {
+            throw new IllegalStateException(
+                    "이미 주문된 적 있는 상품은 삭제할 수 없습니다. 재고를 0으로 설정해 품절 처리해 주세요.");
+        }
+
+        cartItemRepository.deleteByProduct(product);   // 남의 장바구니에 담겨있던 것 정리
+        productLikeRepository.deleteByProduct(product); // 찜해둔 기록 정리
         productRepository.delete(product);
     }
 

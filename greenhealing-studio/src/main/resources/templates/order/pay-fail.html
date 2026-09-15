@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 실패 - 그린힐링 스튜디오</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .fail-wrap { max-width: 480px; margin: 100px auto; padding: 0 20px; text-align: center; }
+        .fail-icon { font-size: 40px; margin-bottom: 16px; }
+        .fail-wrap h1 { font-family:Georgia,serif; font-size:22px; margin-bottom:12px; }
+        .fail-wrap p { font-size:13px; color:#7a8371; margin-bottom:28px; line-height:1.6; }
+        .btn-row { display:flex; gap:10px; justify-content:center; }
+        .btn-row a { padding:12px 24px; border-radius:8px; font-size:13px; text-decoration:none; }
+        .retry-btn { background:#233420; color:#f4f1e8; }
+        .cart-btn { background:#fff; color:#4b5847; border:1px solid #D8D2C0; }
+    </style>
+</head>
+<body style="padding:0;">
+<nav th:replace="~{common/fragments :: nav(active='')}"></nav>
+
+<div class="fail-wrap">
+    <div class="fail-icon">😥</div>
+    <h1>결제에 실패했습니다</h1>
+    <p th:text="${error}">결제 실패 사유</p>
+    <div class="btn-row">
+        <a class="retry-btn" th:href="@{'/orders/' + ${orderId} + '/pay'}">다시 시도하기</a>
+        <a class="cart-btn" th:href="@{/cart}">장바구니로 돌아가기</a>
+    </div>
+</div>
+</body>
+</html>

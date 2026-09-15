@@ -22,4 +22,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
      */
     @Query("select oi from OrderItem oi where oi.product.studio = :studio order by oi.order.createdAt desc")
     List<OrderItem> findByProductStudio(@Param("studio") Studio studio);
+
+    // 이 상품이 한 번이라도 주문된 적 있는지 확인 (있으면 삭제 막아야 함 - 주문 기록이 깨지니까)
+    boolean existsByProduct(com.greenhealing.studio.product.domain.Product product);
 }

@@ -14,6 +14,8 @@
       width:100%; padding:12px 14px; border:1px solid #D8D2C0; border-radius:6px; font-size:13px;
     }
     .field textarea { resize:vertical; }
+    .custom-input { margin-top:8px; }
+    .char-count { font-size:11px; color:#9a9384; text-align:right; margin-top:4px; }
     .submit-btn { width:100%; background:#233420; color:#f4f1e8; border:none; padding:15px 0;
       border-radius:8px; font-size:14px; letter-spacing:1px; cursor:pointer; margin-top:10px; }
     .error-box { color:#b5482e; font-size:12px; margin-bottom:16px; text-align:center; }
@@ -28,7 +30,7 @@
 
   <p class="error-box" th:if="${error}" th:text="${error}"></p>
 
-  <form th:action="@{/custom-order}" method="post">
+  <form th:action="@{/custom-order}" method="post" onsubmit="return prepareSubmit();">
     <div class="field">
       <label>신청할 공방</label>
       <select name="studioId" required>
@@ -36,21 +38,49 @@
         <option th:each="s : ${studios}" th:value="${s.id}" th:text="${s.name}"></option>
       </select>
     </div>
+
+    <!-- 사이즈: 미리 정해둔 선택지 + "직접입력"을 고르면 아래에 입력칸이 나타남 -->
     <div class="field">
       <label>사이즈</label>
-      <input type="text" name="size" placeholder="예: 60x90cm" required>
+      <select id="sizeSelect" name="size" onchange="toggleCustom('size')" required>
+        <option value="30x30cm">30x30cm (미니)</option>
+        <option value="60x90cm" selected>60x90cm (기본)</option>
+        <option value="90x150cm">90x150cm (대형)</option>
+        <option value="custom">직접 입력</option>
+      </select>
+      <!-- 최대 20자, "숫자x숫자cm" 형식으로만 입력되도록 정해진 틀(pattern)을 걸어둠 -->
+      <input type="text" id="sizeCustom" class="custom-input" style="display:none;"
+             maxlength="20" pattern="[0-9]{1,3}x[0-9]{1,3}cm" placeholder="예: 70x100cm (숫자x숫자cm 형식)">
     </div>
+
+    <!-- 색상: 미리 정해둔 색상 톤 중에서 고르거나, "기타"를 골라서 직접 입력 -->
     <div class="field">
-      <label>색상 (선택)</label>
-      <input type="text" name="color" placeholder="예: 그린 톤">
+      <label>색상</label>
+      <select id="colorSelect" name="color" onchange="toggleCustom('color')">
+        <option value="">선택 안 함</option>
+        <option value="그린 톤">그린 톤</option>
+        <option value="베이지 톤">베이지 톤</option>
+        <option value="옐로우 톤">옐로우 톤</option>
+        <option value="핑크 톤">핑크 톤</option>
+        <option value="블루 톤">블루 톤</option>
+        <option value="custom">기타 (직접 입력)</option>
+      </select>
+      <!-- 최대 15자까지만 -->
+      <input type="text" id="colorCustom" class="custom-input" style="display:none;"
+             maxlength="15" placeholder="원하는 색상을 15자 이내로 적어주세요">
     </div>
+
     <div class="field">
       <label>도안 이미지 경로 (선택)</label>
-      <input type="text" name="designImageUrl" placeholder="원하는 도안 이미지가 있다면 경로를 입력해 주세요">
+      <input type="text" name="designImageUrl" maxlength="300" placeholder="원하는 도안 이미지가 있다면 경로를 입력해 주세요">
     </div>
+
     <div class="field">
       <label>요청사항</label>
-      <textarea name="requestNote" rows="4" placeholder="원하는 디자인, 색감, 크기 등을 자유롭게 적어주세요"></textarea>
+      <textarea id="requestNote" name="requestNote" rows="4" maxlength="300"
+                oninput="document.getElementById('noteCount').textContent = this.value.length"
+                placeholder="원하는 디자인, 색감, 크기 등을 자유롭게 적어주세요 (최대 300자)"></textarea>
+      <div class="char-count"><span id="noteCount">0</span> / 300자</div>
     </div>
 
     <button type="submit" class="submit-btn">제작 문의 보내기</button>
@@ -58,5 +88,37 @@
 </div>
 
 <footer th:replace="~{common/fragments :: footer}"></footer>
+
+<script>
+  // "직접입력"을 고르면 -> 아래 입력칸이 나타나고, 그 입력칸이 실제로 제출되는 값이 됨
+  // (원래 select 값이 아니라, 입력칸에 쓴 걸 "size"/"color" 값으로 대신 보내야 하니까
+  //  select는 이름표(name)를 떼고, 입력칸한테 이름표를 붙여주는 방식으로 처리함)
+  function toggleCustom(field) {
+    const select = document.getElementById(field + 'Select');
+    const custom = document.getElementById(field + 'Custom');
+    if (select.value === 'custom') {
+      custom.style.display = 'block';
+      if (field === 'size') custom.required = true;
+      select.removeAttribute('name');
+      custom.setAttribute('name', field);
+    } else {
+      custom.style.display = 'none';
+      custom.required = false;
+      custom.removeAttribute('name');
+      select.setAttribute('name', field);
+    }
+  }
+
+  // 혹시 "직접입력"을 고르고 아무것도 안 썼는데 제출하려 하면 한 번 더 확인
+  function prepareSubmit() {
+    const sizeSelect = document.getElementById('sizeSelect');
+    const sizeCustom = document.getElementById('sizeCustom');
+    if (sizeSelect.value === 'custom' && sizeCustom.value.trim() === '') {
+      alert('사이즈를 직접 입력해 주세요. (숫자x숫자cm 형식)');
+      return false;
+    }
+    return true;
+  }
+</script>
 </body>
 </html>

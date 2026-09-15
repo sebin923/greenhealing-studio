@@ -87,7 +87,12 @@ public class ProductAdminController {
     /** 상품 삭제 */
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, Authentication authentication) {
-        productAdminService.deleteProduct(currentUser(authentication), id);
+        try {
+            productAdminService.deleteProduct(currentUser(authentication), id);
+        } catch (IllegalStateException e) {
+            // 이미 주문된 상품이라 삭제가 막힌 경우 등 - 에러 메시지를 화면에 보여주기 위해 쿼리파라미터로 전달
+            return "redirect:/studio-admin/products?error=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+        }
         return "redirect:/studio-admin/products";
     }
 
